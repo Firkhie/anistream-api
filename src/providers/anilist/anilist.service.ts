@@ -2,7 +2,7 @@ import { getSeason } from "../../utils/helper";
 import { MediaFormat, MediaSort, MediaStatus, MediaType, StaffLanguageV2 } from "./anilist.enums";
 import { fetchAnilist } from "./anilist.fetch";
 import { anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery } from "./anilist.queries";
-import { AnimeBasic, AnimeDetail, Character, MediaVariables, Staff } from "./anilist.types";
+import { AnimeBasic, AnimeDetail, Character, MediaVariables, SearchResponse, Staff } from "./anilist.types";
 
 type PresetName = "popular" | "trending" | "newest" | "upcoming";
 const animePreset: Record<PresetName, Partial<MediaVariables>> = {
@@ -85,7 +85,13 @@ export async function getAnimeListByPreset({ preset, page, perPage }: { preset: 
     return animeBasic
   }) ?? []
 
-  return animeBasics;
+  const result: SearchResponse = {
+    currentPage: data.pageInfo?.currentPage ?? null,
+    hasNextPage: data.pageInfo?.hasNextPage ?? null,
+    results: animeBasics
+  }
+
+  return result;
 }
 
 export async function getAnimeDetailById({ id }: { id: string }) {
@@ -260,9 +266,9 @@ export async function getAnimeDetailById({ id }: { id: string }) {
 
 export async function getAnimeCharactersById({ id, page, perPage }: { id: string, page: number, perPage: number }) {
   const variables = { id, page, perPage }
-  const data = (await fetchAnilist({ query: anilistCharacterQuery, variables })).data.Media;
+  const data = (await fetchAnilist({ query: anilistCharacterQuery, variables })).data.Media.characters;
 
-  const characters: Character[] = data.characters?.edges?.map((item: any) => {
+  const characters: Character[] = data.edges?.map((item: any) => {
     const character: Character = {
       id: item.node.id,
       role: item.role ?? null,
@@ -296,5 +302,11 @@ export async function getAnimeCharactersById({ id, page, perPage }: { id: string
     return character
   }) ?? []
 
-  return characters;
+  const result: SearchResponse = {
+    currentPage: data.pageInfo?.currentPage ?? null,
+    hasNextPage: data.pageInfo?.hasNextPage ?? null,
+    results: characters
+  }
+
+  return result;
 }

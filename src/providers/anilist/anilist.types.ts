@@ -125,7 +125,8 @@ export type StaffName = {
   userPreferred: string | null;
 };
 
-export type PageInfo = {
+export type SearchResponse = {
   currentPage: number | null;
   hasNextPage: boolean | null;
+  results: AnimeBasic[] | Character[];
 };
