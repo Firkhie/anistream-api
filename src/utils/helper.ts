@@ -1,4 +1,4 @@
-import { MediaSeason } from "../types/anilist";
+import { MediaSeason } from "../providers/anilist/anilist.enums";
 
 export function getSeason(): MediaSeason {
   const month = new Date().getMonth() + 1;
