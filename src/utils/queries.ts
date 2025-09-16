@@ -2,6 +2,4 @@ export const anilistDetailQuery = `query Query($id: Int, $type: MediaType, $char
 
 export const anilistCharacterQuery = `query Page($id: Int, $page: Int, $perPage: Int) { Media(id: $id) { characters(page: $page, perPage: $perPage) { edges { role node { name { first last full userPreferred } id image { large medium } } voiceActors { id name { first last full userPreferred } image { large medium } languageV2 } } pageInfo { currentPage hasNextPage } } } }`;
 
-export const anilistListQuery = ``
-
-export const anilistSearchQuery = ``
+export const anilistSearchQuery = `query Page($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear: Int, $type: MediaType, $format: MediaFormat, $status: MediaStatus, $isAdult: Boolean, $search: String, $formatIn: [MediaFormat], $statusIn: [MediaStatus], $genreIn: [String], $averageScoreGreater: Int, $averageScoreLesser: Int, $sort: [MediaSort]) { Page(page: $page, perPage: $perPage) { media(season: $season, seasonYear: $seasonYear, type: $type, format: $format, status: $status, isAdult: $isAdult, search: $search, format_in: $formatIn, status_in: $statusIn, genre_in: $genreIn, averageScore_greater: $averageScoreGreater, averageScore_lesser: $averageScoreLesser, sort: $sort) { id idMal title { romaji english native userPreferred } format status episodes coverImage { extraLarge large medium color } bannerImage averageScore nextAiringEpisode { airingAt timeUntilAiring episode } } } }`;

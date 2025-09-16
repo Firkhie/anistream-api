@@ -1,105 +1,106 @@
 // ----- Types -----
 export type AnimeDetail = AnimeBasic & {
-  description?: string;
-  startDate?: FuzzyDate;
-  endDate?: FuzzyDate;
-  season?: MediaSeason;
-  seasonYear?: number;
-  duration?: number;
-  countryOfOrigin?: string;
-  isLicensed?: boolean;
-  trailer?: MediaTrailer;
-  genres?: string[];
-  synonyms?: string[];
-  isAdult?: boolean;
-  popularity?: number;
-  source?: MediaSource;
-  studios?: string[];
-  relations?: (AnimeBasic & { relationType: MediaRelation })[];
-  characters?: Character[];
-  recommendations?: AnimeBasic[];
-}
+  description: string | null;
+  startDate: FuzzyDate | null;
+  endDate: FuzzyDate | null;
+  season: MediaSeason | null;
+  seasonYear: number | null;
+  duration: number | null;
+  countryOfOrigin: string | null;
+  isLicensed: boolean | null;
+  trailer: MediaTrailer | null;
+  genres: string[] | null;
+  synonyms: string[] | null;
+  isAdult: boolean | null;
+  popularity: number | null;
+  source: MediaSource | null;
+  studios: string[] | null;
+  relations: (AnimeBasic & { relationType: MediaRelation })[] | null;
+  characters: Character[] | null;
+  recommendations: AnimeBasic[] | null;
+};
 
 export type AnimeBasic = {
   id: string;
-  idMal?: string;
-  title?: MediaTitle;
-  format?: MediaFormat;
-  status?: MediaStatus;
-  totalEpisodes?: number;
-  currentEpisodes?: number;
-  color?: string;
-  coverImage?: string;
-  bannerImage?: string;
-  rating?: number;
-  nextAiringEpisode?: AiringSchedule;
-}
+  idMal: string | null;
+  title: MediaTitle | null;
+  format: MediaFormat | null;
+  status: MediaStatus | null;
+  totalEpisodes: number | null;
+  currentEpisodes: number | null;
+  color: string | null;
+  coverImage: string | null;
+  bannerImage: string | null;
+  rating: number | null;
+  nextAiringEpisode: AiringSchedule | null;
+};
 
 export type MediaTitle = {
-  romaji?: string;
-  english?: string;
-  native?: string;
-  userPreferred?: string;
-}
+  romaji: string | null;
+  english: string | null;
+  native: string | null;
+  userPreferred: string | null;
+};
 
 export type MediaTrailer = {
-  id?: string;
-  site?: string;
-  thumbnail?: string;
-}
+  id: string | null;
+  site: string | null;
+  thumbnail: string | null;
+};
 
 export type MediaCoverImage = {
-  extraLarge?: string;
-  large?: string;
-  medium?: string;
-  color?: string;
-}
+  extraLarge: string | null;
+  large: string | null;
+  medium: string | null;
+  color: string | null;
+};
 
 export type FuzzyDate = {
-  year?: number;
-  month?: number;
-  day?: number;
-}
+  year: number | null;
+  month: number | null;
+  day: number | null;
+};
 
 export type AiringSchedule = {
   airingAt: number;
   timeUntilAiring: number;
   episode: number;
-}
+};
 
 export type Character = {
   id: string;
-  role?: CharacterRole;
-  name?: CharacterName;
-  image?: string;
-  voiceActors?: Staff[];
-}
+  role: CharacterRole | null;
+  name: CharacterName | null;
+  image: string | null;
+  voiceActors: Staff[] | null;
+};
 
 export type Staff = {
   id: string;
-  name?: StaffName;
-  image?: string;
-  language: StaffLanguage | StaffLanguageV2
-}
+  name: StaffName | null;
+  image: string | null;
+  language: StaffLanguage | StaffLanguageV2;
+};
 
 export type CharacterName = {
-  first?: string;
-  last?: string;
-  full?: string;
-  userPreferred?: string;
-}
+  first: string | null;
+  last: string | null;
+  full: string | null;
+  userPreferred: string | null;
+};
 
 export type StaffName = {
-  first?: string;
-  last?: string;
-  full?: string;
-  userPreferred?: string;
-}
+  first: string | null;
+  last: string | null;
+  full: string | null;
+  userPreferred: string | null;
+};
 
 export type PageInfo = {
-  currentPage?: number;
-  hasNextPage?: Boolean;
-}
+  currentPage: number | null;
+  hasNextPage: boolean | null;
+};
+
 
 // ----- Enums -----
 export enum MediaFormat {
