@@ -1,5 +1,5 @@
 import express from "express";
-import { getAnimeListByPreset, getAnimeDetailById, getAnimeCharactersById } from "../providers/anilist/anilist.service";
+import { getAnimeListByPreset, getAnimeDetailById, getAnimeCharactersById, getAnimeDetailByRandom } from "../providers/anilist/anilist.service";
 
 const anilist = express.Router();
 
@@ -55,6 +55,16 @@ anilist.get("/upcoming", async (req, res) => {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 })
+
+anilist.get("/random", async (req, res) => {
+  console.log("get anilist random api..")
+  try {
+    const data = await getAnimeDetailByRandom()
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ status: "error", message: (error as Error).message });
+  }
+});
 
 anilist.get("/detail/:id", async (req, res) => {
   console.log("get anilist detail api..")

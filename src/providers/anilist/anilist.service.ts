@@ -1,6 +1,6 @@
 import { getSeason } from "../../utils/helper";
 import { MediaFormat, MediaSort, MediaStatus, MediaType, StaffLanguageV2 } from "./anilist.enums";
-import { fetchAnilist } from "./anilist.fetch";
+import { fetchAnilist, fetchAnilistIds } from "./anilist.fetch";
 import { anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery } from "./anilist.queries";
 import { AnimeBasic, AnimeDetail, Character, MediaVariables, SearchResponse, Staff } from "./anilist.types";
 
@@ -262,6 +262,16 @@ export async function getAnimeDetailById({ id }: { id: string }) {
   };
 
   return animeDetail;
+}
+
+export async function getAnimeDetailByRandom() {
+  const data = await fetchAnilistIds();
+
+  const ids = data?.trim().split('\n');
+  const randomize = Math.floor(Math.random() * ids.length);
+  const selectedAnime = String(ids[randomize])
+
+  return await getAnimeDetailById({ id: selectedAnime })
 }
 
 export async function getAnimeCharactersById({ id, page, perPage }: { id: string, page: number, perPage: number }) {
