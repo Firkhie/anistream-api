@@ -17,10 +17,10 @@ const langFormat: StaffLanguageV2[] = [
   StaffLanguageV2.INDONESIAN,
 ]
 
-export async function fetchAnimePopular() {
+export async function fetchAnimePopular({ page = 1 }: { page: number }) {
   const year = new Date().getFullYear();
   const variables: MediaVariables = {
-    page: 1,
+    page: page,
     perPage: 20,
     type: MediaType.ANIME,
     sort: [
@@ -49,7 +49,36 @@ export async function fetchAnimePopular() {
   }
 }
 
-export async function fetchAnimeDetailById(id: string) {
+export async function fetchAnimeTrending({ page = 1 }: { page: number }) {
+  const variables: MediaVariables = {
+    page: page,
+    perPage: 20,
+    type: MediaType.ANIME,
+    sort: [
+      MediaSort.TRENDING_DESC
+    ],
+  }
+  const options = {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+        query: anilistSearchQuery,
+        variables: variables
+    })
+  }
+  try {
+    const response = await fetch(BASE_URL, options);
+    const data = (await response.json()).data.Page.media;
+    return data;
+  } catch (error) {
+    throw new Error((error as Error).message)
+  }
+}
+
+export async function fetchAnimeDetailById({ id }: { id: string }) {
   const variables = {
     id: id,
     type: "ANIME",
@@ -244,7 +273,7 @@ export async function fetchAnimeDetailById(id: string) {
   }
 }
 
-export async function fetchAnimeCharactersById(id: string, page: number = 1) {
+export async function fetchAnimeCharactersById({ id, page = 1 }: { id: string, page: number }) {
   const variables = {
     id: id,
     page: page,
