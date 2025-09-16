@@ -35,6 +35,24 @@ export type AnimeBasic = {
   nextAiringEpisode: AiringSchedule | null;
 };
 
+export type MediaVariables = {
+  page: number,
+  perPage: number,
+  season?: MediaSeason,
+  seasonYear?: number,
+  type?: MediaType,
+  format?: MediaFormat,
+  status?: MediaStatus,
+  isAdult?: boolean,
+  search?: string,
+  formatIn?: MediaFormat[],
+  statusIn?: MediaStatus[],
+  genreIn?: any[],
+  averageScoreGreater?: number,
+  averageScoreLesser?: number,
+  sort?: MediaSort[],
+}
+
 export type MediaTitle = {
   romaji: string | null;
   english: string | null;

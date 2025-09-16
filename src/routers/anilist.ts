@@ -1,5 +1,5 @@
 import express from "express";
-import { fetchAnimeDetailById, fetchAnimeCharactersById } from "../providers/anilist";
+import { fetchAnimeDetailById, fetchAnimeCharactersById, fetchAnimePopular } from "../providers/anilist";
 
 const router = express.Router();
 
@@ -7,6 +7,16 @@ router.get("/", async (req, res) => {
   console.log("get anilist api..")
   res.json({ message: "Anilist OK" });
 });
+
+router.get("/popular", async (req, res) => {
+  console.log("get anilist popular api..")
+  try {
+    const data = await fetchAnimePopular()
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ status: "error", message: (error as Error).message });
+  }
+})
 
 router.get("/detail/:id", async (req, res) => {
   console.log("get anilist detail api..")

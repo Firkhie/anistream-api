@@ -1,5 +1,6 @@
-import { AnimeDetail, Character, MediaFormat, Staff, StaffLanguageV2 } from "../types/anilist";
-import { anilistCharacterQuery, anilistDetailQuery } from "../utils/queries";
+import { AnimeDetail, Character, MediaFormat, MediaSeason, MediaSort, MediaType, MediaVariables, Staff, StaffLanguageV2 } from "../types/anilist";
+import { getSeason } from "../utils/helper";
+import { anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery } from "../utils/queries";
 
 const BASE_URL = 'https://graphql.anilist.co';
 const animeFormat: MediaFormat[] = [
@@ -16,6 +17,38 @@ const langFormat: StaffLanguageV2[] = [
   StaffLanguageV2.INDONESIAN,
 ]
 
+export async function fetchAnimePopular() {
+  const year = new Date().getFullYear();
+  const variables: MediaVariables = {
+    page: 1,
+    perPage: 20,
+    type: MediaType.ANIME,
+    sort: [
+      MediaSort.POPULARITY_DESC
+    ],
+    seasonYear: year,
+    season: getSeason()
+  }
+  const options = {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+        query: anilistSearchQuery,
+        variables: variables
+    })
+  }
+  try {
+    const response = await fetch(BASE_URL, options);
+    const data = (await response.json()).data.Page.media;
+    return data;
+  } catch (error) {
+    throw new Error((error as Error).message)
+  }
+}
+
 export async function fetchAnimeDetailById(id: string) {
   const variables = {
     id: id,
@@ -30,12 +63,12 @@ export async function fetchAnimeDetailById(id: string) {
   const options = {
     method: 'POST',
     headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
     },
     body: JSON.stringify({
-        query: anilistDetailQuery,
-        variables: variables
+      query: anilistDetailQuery,
+      variables: variables
     })
   }
   try {
@@ -220,12 +253,12 @@ export async function fetchAnimeCharactersById(id: string, page: number = 1) {
   const options = {
     method: 'POST',
     headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
     },
     body: JSON.stringify({
-        query: anilistCharacterQuery,
-        variables: variables
+      query: anilistCharacterQuery,
+      variables: variables
     })
   }
   try {
@@ -271,5 +304,3 @@ export async function fetchAnimeCharactersById(id: string, page: number = 1) {
     throw new Error((error as Error).message)
   }
 }
-
-export async function fetchAnimePopular() {}
