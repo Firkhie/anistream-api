@@ -1,5 +1,5 @@
 import express from "express";
-import { getAnimeListByPreset, getAnimeDetailById, getAnimeCharactersById, getAnimeDetailByRandom, getAnimeListBySearch } from "../providers/anilist/anilist.service";
+import { getAnimeListByPreset, getAnimeDetailById, getAnimeCharactersById, getAnimeDetailByRandom, getAnimeListBySearch, getAnimeAiringSchedule } from "../providers/anilist/anilist.service";
 import { MediaVariables } from "../providers/anilist/anilist.types";
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus, MediaType } from "../providers/anilist/anilist.enums";
 import { cleanQueries } from "../utils/helper";
@@ -78,6 +78,19 @@ anilist.get("/search", async (req, res) => {
   const cleanedQueries = cleanQueries({ queries });
   try {
     const data = await getAnimeListBySearch({ variables: cleanedQueries as MediaVariables })
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ status: "error", message: (error as Error).message });
+  }
+})
+
+anilist.get("/airing", async (req, res) => {
+  console.log("get anilist airing api..")
+  const days = Number(req.query.days) || 7;
+  const page = Number(req.query.page) || 1;
+  const perPage = Number(req.query.perPage) || 20;
+  try {
+    const data = await getAnimeAiringSchedule({ days, page, perPage })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });

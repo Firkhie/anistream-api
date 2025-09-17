@@ -1,7 +1,7 @@
 import { getSeason } from "../../utils/helper";
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus, MediaType, StaffLanguageV2 } from "./anilist.enums";
 import { fetchAnilist, fetchAnilistIds } from "./anilist.fetch";
-import { anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery } from "./anilist.queries";
+import { anilistAiringQuery, anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery } from "./anilist.queries";
 import { AnimeBasic, AnimeDetail, Character, MediaVariables, SearchResponse, Staff } from "./anilist.types";
 
 type PresetName = "popular" | "trending" | "newest" | "upcoming";
@@ -159,6 +159,61 @@ export async function getAnimeListBySearch({ variables }: { variables: MediaVari
 
     return animeBasic
   }) ?? []
+
+  const result: SearchResponse = {
+    currentPage: data.pageInfo?.currentPage ?? null,
+    hasNextPage: data.pageInfo?.hasNextPage ?? null,
+    results: animeBasics
+  }
+
+  return result;
+}
+
+export async function getAnimeAiringSchedule({ days, page, perPage }: { days: number, page: number, perPage: number }) {
+  const now = Math.floor(Date.now() / 1000); 
+  const until = now + days * 24 * 60 * 60;
+
+  const variables = { airingAtLesser: until, airingAtGreater: now, page, perPage }
+  const data = (await fetchAnilist({ query: anilistAiringQuery, variables })).data.Page;
+
+  const animeBasics: AnimeBasic[] = data.airingSchedules.map((item: any) => {
+    if (!animeFormat.includes(item.media.format)) return null;
+
+    const animeBasic: AnimeBasic = {
+      id: item.media.id,
+      idMal: item.media.idMal ?? null,
+      title: {
+        romaji: item.media.title?.romaji ?? null,
+        english: item.media.title?.english ?? null,
+        native: item.media.title?.native ?? null,
+        userPreferred: item.media.title?.userPreferred ?? null,
+      },
+      format: item.media.format ?? null,
+      status: item.media.status ?? null,
+      totalEpisodes: item.media.episodes ?? null,
+      currentEpisodes: item.media.nextAiringEpisode
+        ? (item.media.nextAiringEpisode.episode ?? 1) - 1
+        : item.media.episodes ?? null,
+      color: item.media.coverImage?.color ?? null,
+      coverImage:
+        item.media.coverImage?.extraLarge ??
+        item.media.coverImage?.large ??
+        item.media.coverImage?.medium ??
+        null,
+      bannerImage: item.media.bannerImage ?? null,
+      rating: item.media.averageScore ?? null,
+      nextAiringEpisode: item.media.nextAiringEpisode
+        ? {
+            airingAt: item.media.nextAiringEpisode.airingAt ?? null,
+            episode: item.media.nextAiringEpisode.episode ?? null,
+            timeUntilAiring: item.media.nextAiringEpisode.timeUntilAiring ?? null,
+          }
+        : null,
+    }
+
+    return animeBasic
+  })
+  .filter(Boolean) ?? []
 
   const result: SearchResponse = {
     currentPage: data.pageInfo?.currentPage ?? null,
