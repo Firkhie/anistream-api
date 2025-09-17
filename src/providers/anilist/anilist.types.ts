@@ -1,5 +1,6 @@
 import { 
   CharacterRole, 
+  GenreCollection, 
   MediaFormat, 
   MediaRelation, 
   MediaSeason, 
@@ -20,7 +21,7 @@ export type AnimeDetail = AnimeBasic & {
   countryOfOrigin: string | null;
   isLicensed: boolean | null;
   trailer: MediaTrailer | null;
-  genres: string[] | null;
+  genres: GenreCollection[] | null;
   synonyms: string[] | null;
   isAdult: boolean | null;
   popularity: number | null;
@@ -58,7 +59,7 @@ export type MediaVariables = {
   search?: string,
   formatIn?: MediaFormat[],
   statusIn?: MediaStatus[],
-  genreIn?: any[],
+  genreIn?: GenreCollection[],
   averageScoreGreater?: number,
   averageScoreLesser?: number,
   sort?: MediaSort[],

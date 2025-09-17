@@ -13,3 +13,9 @@ export function getSeason(): MediaSeason {
     return MediaSeason.FALL;
   }
 }
+
+export function cleanQueries({ queries }: { queries: any }) {
+  return Object.fromEntries(
+    Object.entries(queries).filter(([_, v]) => v != null && v !== "" && !Number.isNaN(v))
+  )
+}

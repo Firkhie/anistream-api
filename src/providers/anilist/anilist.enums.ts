@@ -101,6 +101,28 @@ export enum MediaSource {
   LIVE_ACTION = 'LIVE_ACTION',
 }
 
+export enum GenreCollection {
+  ACTION = "Action",
+  ADVENTURE = "Adventure",
+  COMEDY = "Comedy",
+  DRAMA = "Drama",
+  ECCHI = "Ecchi",
+  FANTASY = "Fantasy",
+  HENTAI = "Hentai",
+  HORROR = "Horror",
+  MAHOU_SHOUJO = "Mahou Shoujo",
+  MECHA = "Mecha",
+  MUSIC = "Music",
+  MYSTERY = "Mystery",
+  PSYCHOLOGICAL = "Psychological",
+  ROMANCE = "Romance",
+  SCIFI = "Sci-Fi",
+  SLICE_OF_LIFE = "Slice of Life",
+  SPORTS = "Sports",
+  SUPERNATURAL = "Supernatural",
+  THRILLER = "Thriller",
+}
+
 export enum StaffLanguage {
   JAPANESE = 'JAPANESE',
   ENGLISH = 'ENGLISH',

@@ -1,5 +1,5 @@
 import { getSeason } from "../../utils/helper";
-import { MediaFormat, MediaSort, MediaStatus, MediaType, StaffLanguageV2 } from "./anilist.enums";
+import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus, MediaType, StaffLanguageV2 } from "./anilist.enums";
 import { fetchAnilist, fetchAnilistIds } from "./anilist.fetch";
 import { anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery } from "./anilist.queries";
 import { AnimeBasic, AnimeDetail, Character, MediaVariables, SearchResponse, Staff } from "./anilist.types";
@@ -92,6 +92,91 @@ export async function getAnimeListByPreset({ preset, page, perPage }: { preset: 
   }
 
   return result;
+}
+
+export async function getAnimeListBySearch({ variables }: { variables: MediaVariables }) {
+  if (variables.season && !Object.values(MediaSeason).some(s => s === variables.season)) {
+    throw new Error(`Invalid season: ${variables.season}`);
+  }
+  if (variables.format && !Object.values(MediaFormat).some(f => f === variables.format)) {
+    throw new Error(`Invalid format: ${variables.format}`);
+  }
+  if (variables.status && !Object.values(MediaStatus).some(s => s === variables.status)) {
+    throw new Error(`Invalid status: ${variables.status}`);
+  }
+  if (variables.averageScoreGreater && (variables.averageScoreGreater > 100 || variables.averageScoreGreater < 0)) {
+    throw new Error(`Invalid score, must be between 0 - 100`);
+  }
+  if (variables.averageScoreLesser && (variables.averageScoreLesser > 100 || variables.averageScoreLesser < 0)) {
+    throw new Error(`Invalid score, must be between 0 - 100`);
+  }
+  if (variables.genreIn) {
+    const invalid = variables.genreIn.filter(item => !Object.values(GenreCollection).includes(item));
+    if (invalid.length > 0) {
+      throw new Error(`Invalid genres: ${invalid.join(', ')}`);
+    }
+  }
+  if (variables.sort) {
+    const invalid = variables.sort.filter(item => !Object.values(MediaSort).includes(item));
+    if (invalid.length > 0) {
+      throw new Error(`Invalid sort: ${invalid.join(', ')}`);
+    }
+  }
+  const data = (await fetchAnilist({ query: anilistSearchQuery, variables: { ...variables, type: "ANIME" } })).data.Page;
+
+  const animeBasics: AnimeBasic[] = data.media.map((item: any) => {
+    const animeBasic: AnimeBasic = {
+      id: item.id,
+      idMal: item.idMal ?? null,
+      title: {
+        romaji: item.title?.romaji ?? null,
+        english: item.title?.english ?? null,
+        native: item.title?.native ?? null,
+        userPreferred: item.title?.userPreferred ?? null,
+      },
+      format: item.format ?? null,
+      status: item.status ?? null,
+      totalEpisodes: item.episodes ?? null,
+      currentEpisodes: item.nextAiringEpisode
+        ? (item.nextAiringEpisode.episode ?? 1) - 1
+        : item.episodes ?? null,
+      color: item.coverImage?.color ?? null,
+      coverImage:
+        item.coverImage?.extraLarge ??
+        item.coverImage?.large ??
+        item.coverImage?.medium ??
+        null,
+      bannerImage: item.bannerImage ?? null,
+      rating: item.averageScore ?? null,
+      nextAiringEpisode: item.nextAiringEpisode
+        ? {
+            airingAt: item.nextAiringEpisode.airingAt ?? null,
+            episode: item.nextAiringEpisode.episode ?? null,
+            timeUntilAiring: item.nextAiringEpisode.timeUntilAiring ?? null,
+          }
+        : null,
+    }
+
+    return animeBasic
+  }) ?? []
+
+  const result: SearchResponse = {
+    currentPage: data.pageInfo?.currentPage ?? null,
+    hasNextPage: data.pageInfo?.hasNextPage ?? null,
+    results: animeBasics
+  }
+
+  return result;
+}
+
+export async function getAnimeDetailByRandom() {
+  const data = await fetchAnilistIds();
+
+  const ids = data?.trim().split('\n');
+  const randomize = Math.floor(Math.random() * ids.length);
+  const selectedAnime = String(ids[randomize])
+
+  return await getAnimeDetailById({ id: selectedAnime })
 }
 
 export async function getAnimeDetailById({ id }: { id: string }) {
@@ -262,16 +347,6 @@ export async function getAnimeDetailById({ id }: { id: string }) {
   };
 
   return animeDetail;
-}
-
-export async function getAnimeDetailByRandom() {
-  const data = await fetchAnilistIds();
-
-  const ids = data?.trim().split('\n');
-  const randomize = Math.floor(Math.random() * ids.length);
-  const selectedAnime = String(ids[randomize])
-
-  return await getAnimeDetailById({ id: selectedAnime })
 }
 
 export async function getAnimeCharactersById({ id, page, perPage }: { id: string, page: number, perPage: number }) {
