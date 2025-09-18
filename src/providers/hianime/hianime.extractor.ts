@@ -1,5 +1,16 @@
 import * as cheerio from "cheerio";
 
+type HianimeEpisode = {
+  id: string | null;
+  episode_no: number;
+  filler: boolean;
+};
+
+type HianimeEpisodesResult = {
+  totalEpisodes: number;
+  episodes: HianimeEpisode[];
+};
+
 export async function extractHianimeBySearch({ data }: { data: string }) {
   const $ = cheerio.load(data);
   
@@ -31,4 +42,25 @@ export async function extractHianimeBySearch({ data }: { data: string }) {
   });
 
   return result
+}
+
+export async function extractHianimeEpisodesById({ data }: { data: { status: any, html: any } }) {
+  const $ = cheerio.load(String(data.html));
+
+  const result: HianimeEpisodesResult  = {
+    totalEpisodes: 0,
+    episodes: [],
+  };
+
+  result.totalEpisodes = Number($(".detail-infor-content .ss-list a").length);
+
+  $(".detail-infor-content .ss-list a").each((_, el) => {
+    result.episodes.push({
+      episode_no: Number($(el).attr("data-number")),
+      id: $(el)?.attr("href")?.split("/")?.pop() || null,
+      filler: $(el).hasClass("ssl-item-filler"),
+    });
+  });
+
+  return result;
 }

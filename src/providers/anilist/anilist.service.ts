@@ -1,6 +1,6 @@
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus, MediaType, StaffLanguageV2 } from "./anilist.enums";
 import { fetchAnilist, fetchAnilistIds } from "./anilist.fetch";
-import { anilistAiringQuery, anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery } from "./anilist.queries";
+import { anilistAiringQuery, anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery, anilistTitleQuery } from "./anilist.queries";
 import { AnimeBasic, AnimeDetail, Character, MediaVariables, SearchResponse, Staff } from "./anilist.types";
 import { getSeason } from "../../utils/helper";
 
@@ -449,4 +449,11 @@ export async function getAnilistCharactersById({ id, page, perPage }: { id: stri
   }
 
   return result;
+}
+
+export async function getAnilistTitleById({ id }: { id: string }) {
+  const variables = { id }
+  const data = (await fetchAnilist({ query: anilistTitleQuery, variables })).data.Media.title;
+
+  return data;
 }

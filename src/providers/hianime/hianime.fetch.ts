@@ -1,6 +1,6 @@
 import { MediaTitle } from "../anilist/anilist.types";
 
-const BASE_URL = 'https://hianime.do/';
+const BASE_URL = 'https://hianime.do';
 
 export async function fetchHianimeBySearch({ title, page }: { title: MediaTitle, page: number }) {
   try {
@@ -17,6 +17,25 @@ export async function fetchHianimeBySearch({ title, page }: { title: MediaTitle,
     const response = await fetch(URL, options);
     
     return response.text();
+  } catch (error) {
+    throw new Error((error as Error).message)
+  }
+}
+
+export async function fetchHianimeEpisodesById({ id }: { id: string }) {
+  try {
+    const showId = id.split("-").pop();
+    const options = {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Referer': `https://${BASE_URL}/watch/${id}`,
+      },
+    }
+    const URL = `${BASE_URL}/ajax/v2/episode/list/${showId}`
+    const response = await fetch(URL, options);
+    
+    return response.json();
   } catch (error) {
     throw new Error((error as Error).message)
   }

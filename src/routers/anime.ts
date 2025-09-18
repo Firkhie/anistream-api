@@ -3,6 +3,8 @@ import { getAnilistByPreset, getAnilistDetailById, getAnilistCharactersById, get
 import { MediaVariables } from "../providers/anilist/anilist.types";
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus } from "../providers/anilist/anilist.enums";
 import { cleanQueries } from "../utils/helper";
+import { getHianimeBySearch } from "../providers/hianime/hianime.service";
+import { animeMapper, episodeMapper } from "../mapper/anime.mapper";
 
 const anime = express.Router();
 
@@ -125,5 +127,15 @@ anime.get("/detail/:id/characters", async (req, res) => {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 });
+
+anime.get("/test-hianime", async (req, res) => {
+  console.log("get hianime api..")
+  try {
+    const data = await episodeMapper({ id: "178869" })
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ status: "error", message: (error as Error).message });
+  }
+}) 
 
 export default anime;
