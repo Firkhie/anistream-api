@@ -1,8 +1,8 @@
 import express from "express";
-import anilist from "./anilist.js";
+import anime from "./anime.js";
 
 const router = express.Router();
 
-router.use("/anilist", anilist);
+router.use("/anime", anime);
 
 export default router;

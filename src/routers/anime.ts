@@ -1,66 +1,61 @@
 import express from "express";
-import { getAnimeListByPreset, getAnimeDetailById, getAnimeCharactersById, getAnimeDetailByRandom, getAnimeListBySearch, getAnimeAiringSchedule } from "../providers/anilist/anilist.service";
+import { getAnilistByPreset, getAnilistDetailById, getAnilistCharactersById, getAnilistDetailByRandom, getAnilistBySearch, getAnilistAiringSchedule } from "../providers/anilist/anilist.service";
 import { MediaVariables } from "../providers/anilist/anilist.types";
-import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus, MediaType } from "../providers/anilist/anilist.enums";
+import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus } from "../providers/anilist/anilist.enums";
 import { cleanQueries } from "../utils/helper";
 
-const anilist = express.Router();
+const anime = express.Router();
 
-anilist.get("/", async (req, res) => {
-  console.log("get anilist api..")
-  res.json({ message: "Anilist OK" });
-});
-
-anilist.get("/popular", async (req, res) => {
-  console.log("get anilist popular api..")
+anime.get("/popular", async (req, res) => {
+  console.log("get anime popular api..")
   const page = Number(req.query.page) || 1;
   const perPage = Number(req.query.perPage) || 20;
   try {
-    const data = await getAnimeListByPreset({ preset: "popular", page, perPage })
+    const data = await getAnilistByPreset({ preset: "popular", page, perPage })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 })
 
-anilist.get("/trending", async (req, res) => {
-  console.log("get anilist trending api..")
+anime.get("/trending", async (req, res) => {
+  console.log("get anime trending api..")
   const page = Number(req.query.page) || 1;
   const perPage = Number(req.query.perPage) || 20;
   try {
-    const data = await getAnimeListByPreset({ preset: "trending", page, perPage })
+    const data = await getAnilistByPreset({ preset: "trending", page, perPage })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 })
 
-anilist.get("/newest", async (req, res) => {
-  console.log("get anilist newest api..")
+anime.get("/newest", async (req, res) => {
+  console.log("get anime newest api..")
   const page = Number(req.query.page) || 1;
   const perPage = Number(req.query.perPage) || 20;
   try {
-    const data = await getAnimeListByPreset({ preset: "newest", page, perPage })
+    const data = await getAnilistByPreset({ preset: "newest", page, perPage })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 })
 
-anilist.get("/upcoming", async (req, res) => {
-  console.log("get anilist upcoming api..")
+anime.get("/upcoming", async (req, res) => {
+  console.log("get anime upcoming api..")
   const page = Number(req.query.page) || 1;
   const perPage = Number(req.query.perPage) || 20;
   try {
-    const data = await getAnimeListByPreset({ preset: "upcoming", page, perPage })
+    const data = await getAnilistByPreset({ preset: "upcoming", page, perPage })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 })
 
-anilist.get("/search", async (req, res) => {
-  console.log("get anilist search api..")
+anime.get("/search", async (req, res) => {
+  console.log("get anime search api..")
   const queries: MediaVariables = {
     page: Number(req.query.page) || 1,
     perPage: Number(req.query.perPage) || 20,
@@ -77,58 +72,58 @@ anilist.get("/search", async (req, res) => {
   }
   const cleanedQueries = cleanQueries({ queries });
   try {
-    const data = await getAnimeListBySearch({ variables: cleanedQueries as MediaVariables })
+    const data = await getAnilistBySearch({ variables: cleanedQueries as MediaVariables })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 })
 
-anilist.get("/airing", async (req, res) => {
-  console.log("get anilist airing api..")
+anime.get("/airing", async (req, res) => {
+  console.log("get anime airing api..")
   const days = Number(req.query.days) || 7;
   const page = Number(req.query.page) || 1;
   const perPage = Number(req.query.perPage) || 20;
   try {
-    const data = await getAnimeAiringSchedule({ days, page, perPage })
+    const data = await getAnilistAiringSchedule({ days, page, perPage })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 })
 
-anilist.get("/random", async (req, res) => {
-  console.log("get anilist random api..")
+anime.get("/random", async (req, res) => {
+  console.log("get anime random api..")
   try {
-    const data = await getAnimeDetailByRandom()
+    const data = await getAnilistDetailByRandom()
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 });
 
-anilist.get("/detail/:id", async (req, res) => {
-  console.log("get anilist detail api..")
+anime.get("/detail/:id", async (req, res) => {
+  console.log("get anime detail api..")
   const { id } = req.params
   try {
-    const data = await getAnimeDetailById({ id })
+    const data = await getAnilistDetailById({ id })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 });
 
-anilist.get("/detail/:id/characters", async (req, res) => {
-  console.log("get anilist detail characters api..")
+anime.get("/detail/:id/characters", async (req, res) => {
+  console.log("get anime detail characters api..")
   const { id } = req.params
   const page = Number(req.query.page) || 1;
   const perPage = Number(req.query.perPage) || 20;
   try {
-    const data = await getAnimeCharactersById({ id, page, perPage })
+    const data = await getAnilistCharactersById({ id, page, perPage })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
 });
 
-export default anilist;
+export default anime;

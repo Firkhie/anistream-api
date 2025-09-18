@@ -1,8 +1,8 @@
-import { getSeason } from "../../utils/helper";
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus, MediaType, StaffLanguageV2 } from "./anilist.enums";
 import { fetchAnilist, fetchAnilistIds } from "./anilist.fetch";
 import { anilistAiringQuery, anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery } from "./anilist.queries";
 import { AnimeBasic, AnimeDetail, Character, MediaVariables, SearchResponse, Staff } from "./anilist.types";
+import { getSeason } from "../../utils/helper";
 
 type PresetName = "popular" | "trending" | "newest" | "upcoming";
 const animePreset: Record<PresetName, Partial<MediaVariables>> = {
@@ -45,7 +45,7 @@ const langFormat: StaffLanguageV2[] = [
   StaffLanguageV2.INDONESIAN,
 ]
 
-export async function getAnimeListByPreset({ preset, page, perPage }: { preset: PresetName, page: number, perPage: number }) {
+export async function getAnilistByPreset({ preset, page, perPage }: { preset: PresetName, page: number, perPage: number }) {
   const variables = { ...animePreset[preset], page, perPage }
   const data = (await fetchAnilist({ query: anilistSearchQuery, variables })).data.Page;
 
@@ -94,7 +94,7 @@ export async function getAnimeListByPreset({ preset, page, perPage }: { preset: 
   return result;
 }
 
-export async function getAnimeListBySearch({ variables }: { variables: MediaVariables }) {
+export async function getAnilistBySearch({ variables }: { variables: MediaVariables }) {
   if (variables.season && !Object.values(MediaSeason).some(s => s === variables.season)) {
     throw new Error(`Invalid season: ${variables.season}`);
   }
@@ -169,7 +169,7 @@ export async function getAnimeListBySearch({ variables }: { variables: MediaVari
   return result;
 }
 
-export async function getAnimeAiringSchedule({ days, page, perPage }: { days: number, page: number, perPage: number }) {
+export async function getAnilistAiringSchedule({ days, page, perPage }: { days: number, page: number, perPage: number }) {
   const now = Math.floor(Date.now() / 1000); 
   const until = now + days * 24 * 60 * 60;
 
@@ -224,17 +224,17 @@ export async function getAnimeAiringSchedule({ days, page, perPage }: { days: nu
   return result;
 }
 
-export async function getAnimeDetailByRandom() {
+export async function getAnilistDetailByRandom() {
   const data = await fetchAnilistIds();
 
   const ids = data?.trim().split('\n');
   const randomize = Math.floor(Math.random() * ids.length);
   const selectedAnime = String(ids[randomize])
 
-  return await getAnimeDetailById({ id: selectedAnime })
+  return await getAnilistDetailById({ id: selectedAnime })
 }
 
-export async function getAnimeDetailById({ id }: { id: string }) {
+export async function getAnilistDetailById({ id }: { id: string }) {
   const variables = { id }
   const data = (await fetchAnilist({ query: anilistDetailQuery, variables })).data.Media;
 
@@ -404,7 +404,7 @@ export async function getAnimeDetailById({ id }: { id: string }) {
   return animeDetail;
 }
 
-export async function getAnimeCharactersById({ id, page, perPage }: { id: string, page: number, perPage: number }) {
+export async function getAnilistCharactersById({ id, page, perPage }: { id: string, page: number, perPage: number }) {
   const variables = { id, page, perPage }
   const data = (await fetchAnilist({ query: anilistCharacterQuery, variables })).data.Media.characters;
 
