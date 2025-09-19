@@ -2,14 +2,25 @@ import { getAnilistTitleById } from "../providers/anilist/anilist.service";
 import { getAnizipEpisodesById } from "../providers/anizip/anizip.service";
 import { getHianimeEpisodesById, getHianimeMapper } from "../providers/hianime/hianime.service";
 
-export async function episodeMapper({ id }: { id: string }) {
+export type Provider = "hianime" | "animekai"
+export async function episodeMapper({ id, provider = "hianime" }: { id: string, provider: Provider }) {
   const ids = await animeMapper({ id })
   const episodes = await getAnizipEpisodesById({ id })
-  const epsSource = await getHianimeEpisodesById({ id: ids.hianimeId })
+  
+  let epsSource: any = []
+  switch (provider) {
+    case "hianime":
+      epsSource = await getHianimeEpisodesById({ id: ids.hianimeId })
+      break;
+  
+    default:
+      epsSource = await getHianimeEpisodesById({ id: ids.hianimeId })
+      break;
+  }
 
-  const mergedEpisodes = epsSource.episodes.map((item) => {
+  const mergedEpisodes = epsSource.episodes.map((item: any) => {
     return { id: item.id, ...episodes[String(item.episode_no)] }
-  })
+  })  
 
   return mergedEpisodes;
 }

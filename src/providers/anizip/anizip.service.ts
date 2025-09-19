@@ -1,18 +1,24 @@
 import { fetchAnizipEpisodesById } from "./anizip.fetch";
+import { AnizipEpisode, AnizipEpisodesResponse } from "./anizip.types";
 
 export async function getAnizipEpisodesById({ id }: { id: string }) {
   const data = (await fetchAnizipEpisodesById({ id })).episodes;
+  
+  const episodes: AnizipEpisodesResponse = {}
 
-  const episodes = {}
   for (const eps in data) {
-    episodes[data[eps].episodeNumber] = ({
-      title: data[eps].title.en || data[eps].title['x-jat'],
-      episode: data[eps].episodeNumber,
-      description: data[eps].overview,
-      image: data[eps].image,
-      rating: data[eps].rating,
-      airDate: data[eps].airDate
-    })
+    const raw = data[eps];
+
+    const episode: AnizipEpisode = {
+      title: raw.title?.en || raw.title?.["x-jat"] || `Episode ${eps}`,
+      episode: Number(raw.episodeNumber) || Number(raw.episode) || Number(eps),
+      description: raw.overview || raw.summary || "No description provided.",
+      image: raw.image ?? null,
+      rating: raw.rating ?? null,
+      airDate: raw.airDate ?? null,
+    };
+
+    episodes[eps] = episode;
   }
   
   return episodes;
