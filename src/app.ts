@@ -3,7 +3,6 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 
-
 import routers from "./routers/index.js";
 import * as middlewares from "./middlewares.js";
 

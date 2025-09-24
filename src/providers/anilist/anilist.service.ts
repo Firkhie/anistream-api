@@ -3,6 +3,7 @@ import { fetchAnilist, fetchAnilistIds } from "./anilist.fetch";
 import { anilistAiringQuery, anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery, anilistTitleQuery } from "./anilist.queries";
 import { AnimeBasic, AnimeDetail, Character, MediaVariables, SearchResponse, Staff } from "./anilist.types";
 import { getSeason } from "../../utils/helper";
+import { redis } from "../..";
 
 type PresetName = "popular" | "trending" | "newest" | "upcoming";
 const animePreset: Record<PresetName, Partial<MediaVariables>> = {
@@ -47,6 +48,13 @@ const langFormat: StaffLanguageV2[] = [
 
 export async function getAnilistByPreset({ preset, page, perPage }: { preset: PresetName, page: number, perPage: number }) {
   const variables = { ...animePreset[preset], page, perPage }
+  const cacheKey = `anilist:${preset}:p${page}:pp${perPage}`
+
+  if (redis) {
+    const cacheData = await redis.get(cacheKey)
+    if (cacheData) return cacheData as SearchResponse
+  }
+
   const data = (await fetchAnilist({ query: anilistSearchQuery, variables })).data.Page;
 
   const animeBasics: AnimeBasic[] = data.media.map((item: any) => {
@@ -89,6 +97,18 @@ export async function getAnilistByPreset({ preset, page, perPage }: { preset: Pr
     currentPage: data.pageInfo?.currentPage ?? null,
     hasNextPage: data.pageInfo?.hasNextPage ?? null,
     results: animeBasics
+  }
+
+  if (redis) {
+    let EXP_TIME = 0;
+    
+    if (preset === "newest") {
+      EXP_TIME = 60 * 60 * 3; // 3H
+    } else {
+      EXP_TIME = 60 * 60 * 24 * 7; // 7D
+    }
+
+    await redis.set(cacheKey, result, { ex: EXP_TIME });
   }
 
   return result;

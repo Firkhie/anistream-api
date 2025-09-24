@@ -1,11 +1,21 @@
 import app from "./app.js";
 import { env } from "./env.js";
+import { Redis } from '@upstash/redis'
+
+export const redis = 
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
+  : null;
 
 const port = env.PORT;
 const server = app.listen(port, () => {
-  /* eslint-disable no-console */
   console.log(`Listening: http://localhost:${port}`);
-  /* eslint-enable no-console */
+  if (!redis) {
+    console.log(`Redis not found. Cache disabled.`);
+  }
 });
 
 server.on("error", (err) => {
