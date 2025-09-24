@@ -40,3 +40,14 @@ export async function fetchHianimeEpisodesById({ id }: { id: string }) {
     throw new Error((error as Error).message)
   }
 }
+
+export async function fetchHianimeServersByEpisodeId({ id }: { id: string }) {
+  try {
+    const URL = `${BASE_URL}/ajax/v2/episode/servers?episodeId=${id}`
+    const response = await fetch(URL);
+    
+    return response.json();
+  } catch (error) {
+    throw new Error((error as Error).message)
+  }
+}

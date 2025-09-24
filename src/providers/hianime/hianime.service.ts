@@ -1,7 +1,7 @@
 import { findSimilarTitles } from "../../utils/helper";
 import { MediaTitle } from "../anilist/anilist.types";
-import { extractHianimeBySearch, extractHianimeEpisodesById } from "./hianime.extractor";
-import { fetchHianimeBySearch, fetchHianimeEpisodesById } from "./hianime.fetch";
+import { extractHianimeBySearch, extractHianimeEpisodesById, extractHianimeServersByEpisodeId } from "./hianime.extractor";
+import { fetchHianimeBySearch, fetchHianimeEpisodesById, fetchHianimeServersByEpisodeId } from "./hianime.fetch";
 
 export async function getHianimeMapper({ title }: { title: MediaTitle }) {
   const searchResults = await getHianimeBySearch({ title })
@@ -39,6 +39,13 @@ export async function getHianimeBySearch({ title }: { title: MediaTitle }) {
 export async function getHianimeEpisodesById({ id }: { id: string }) {
   const response = await fetchHianimeEpisodesById({ id });
   const data = await extractHianimeEpisodesById({ data: response });
+  
+  return data;
+}
+
+export async function getHianimeServersByEpisodeId({ id }: { id: string }) {
+  const response = await fetchHianimeServersByEpisodeId({ id });
+  const data = await extractHianimeServersByEpisodeId({ data: response });
   
   return data;
 }

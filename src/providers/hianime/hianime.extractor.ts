@@ -1,22 +1,14 @@
 import * as cheerio from "cheerio";
-
-type HianimeEpisode = {
-  id: string | null;
-  episode_no: number;
-  filler: boolean;
-};
-
-type HianimeEpisodesResult = {
-  totalEpisodes: number;
-  episodes: HianimeEpisode[];
-};
+import { HianimeEpisodesResult, HianimeListResult } from "./hianime.types";
 
 export async function extractHianimeBySearch({ data }: { data: string }) {
+  if (!data) return []
+
   const $ = cheerio.load(data);
   
   const elements = "#main-content .film_list-wrap .flw-item";
 
-  const result: any = [];
+  const result: HianimeListResult[] = [];
   $(elements).each((_, el) => {
     const id =
       $(el)
@@ -44,7 +36,9 @@ export async function extractHianimeBySearch({ data }: { data: string }) {
   return result
 }
 
-export async function extractHianimeEpisodesById({ data }: { data: { status: any, html: any } }) {
+export async function extractHianimeEpisodesById({ data }: { data: { status: boolean, html: string } }) {
+  if (!data.html) return []
+  
   const $ = cheerio.load(String(data.html));
 
   const result: HianimeEpisodesResult  = {
@@ -63,4 +57,25 @@ export async function extractHianimeEpisodesById({ data }: { data: { status: any
   });
 
   return result;
+}
+
+export async function extractHianimeServersByEpisodeId({ data }: { data: { status: boolean, html: string } }) {
+  if (!data.html) return []
+
+  const $ = cheerio.load(data.html);
+  const result: any = [];
+    $(".server-item").each((index, element) => {
+      const data_id = $(element).attr("data-id");
+      const server_id = $(element).attr("data-server-id");
+      const type = $(element).attr("data-type");
+
+      const serverName = $(element).find("a").text().trim();
+      result.push({
+        type,
+        data_id,
+        server_id,
+        serverName,
+      });
+    });
+    return result;
 }

@@ -1,6 +1,7 @@
 import { compareTwoStrings } from 'string-similarity';
 import { MediaSeason } from "../providers/anilist/anilist.enums";
 import { MediaTitle } from "../providers/anilist/anilist.types";
+import { HianimeListResult } from '../providers/hianime/hianime.types';
 
 export function getSeason(): MediaSeason {
   const month = new Date().getMonth() + 1;
@@ -28,7 +29,7 @@ export function findSimilarTitles({
   type,
 }: {
   inputTitle: string;
-  titles: { id: string; title: MediaTitle }[];
+  titles: { id: string; title: MediaTitle }[] | HianimeListResult[];
   type: "english" | "romaji";
 }) {
   const results: { id: string, similarity: number }[] = [];
@@ -43,7 +44,7 @@ export function findSimilarTitles({
     
     const similarity = compareTwoStrings(inputTitle.toLowerCase(), cleanedTitle.toLowerCase());
     if (similarity > 0.6) {
-      results.push({ id: item.id, similarity });
+      results.push({ id: item.id!, similarity });
     }
   })
 

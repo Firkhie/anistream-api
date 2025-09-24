@@ -3,8 +3,8 @@ import { getAnilistByPreset, getAnilistDetailById, getAnilistCharactersById, get
 import { MediaVariables } from "../providers/anilist/anilist.types";
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus } from "../providers/anilist/anilist.enums";
 import { cleanQueries } from "../utils/helper";
-import { getHianimeBySearch } from "../providers/hianime/hianime.service";
-import { animeMapper, episodeMapper, Provider } from "../mapper/anime.mapper";
+import { getHianimeServersByEpisodeId } from "../providers/hianime/hianime.service";
+import { episodeMapper, Provider } from "../mappers/anime.mapper";
 
 const anime = express.Router();
 
@@ -138,6 +138,19 @@ anime.get("/episodes/:id", async (req, res) => {
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
   }
-}) 
+})
+
+anime.get("/servers/:episodeId", async (req, res) => {
+  console.log("get episode servers api..")
+  const { episodeId } = req.params;
+  try {
+    const data = await getHianimeServersByEpisodeId({ id: episodeId })
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ status: "error", message: (error as Error).message });
+  }
+})
+
+
 
 export default anime;
