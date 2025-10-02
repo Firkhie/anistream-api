@@ -18,5 +18,8 @@ export type HianimeListResult = {
 }
 
 export type HianimeServersResult = {
-  
+  type: "sub" | "dub" | "raw";
+  data_id: string;
+  server_id: string;
+  serverName: string;
 }

@@ -1,7 +1,7 @@
 import { findSimilarTitles } from "../../utils/helper";
 import { MediaTitle } from "../anilist/anilist.types";
-import { extractHianimeBySearch, extractHianimeEpisodesById, extractHianimeServersByEpisodeId } from "./hianime.extractor";
-import { fetchHianimeBySearch, fetchHianimeEpisodesById, fetchHianimeServersByEpisodeId } from "./hianime.fetch";
+import { extractHianimeBySearch, extractHianimeDataId, extractHianimeEpisodesById, extractHianimeServersByEpisodeId } from "./hianime.extractor";
+import { fetchHianimeBySearch, fetchHianimeEpisodesById, fetchHianimeIframeHtml, fetchHianimeRawSources, fetchHianimeServersByEpisodeId } from "./hianime.fetch";
 
 export async function getHianimeMapper({ title }: { title: MediaTitle }) {
   const searchResults = await getHianimeBySearch({ title })
@@ -30,22 +30,47 @@ export async function getHianimeMapper({ title }: { title: MediaTitle }) {
 }
 
 export async function getHianimeBySearch({ title }: { title: MediaTitle }) {
-  const response = await fetchHianimeBySearch({ title, page: 1 });
-  const data = await extractHianimeBySearch({ data: response });
+  const raw = await fetchHianimeBySearch({ title, page: 1 });
+  const data = await extractHianimeBySearch({ data: raw });
   
   return data;
 }
 
 export async function getHianimeEpisodesById({ id }: { id: string }) {
-  const response = await fetchHianimeEpisodesById({ id });
-  const data = await extractHianimeEpisodesById({ data: response });
+  const raw = await fetchHianimeEpisodesById({ id });
+  const data = await extractHianimeEpisodesById({ data: raw });
   
   return data;
 }
 
 export async function getHianimeServersByEpisodeId({ id }: { id: string }) {
-  const response = await fetchHianimeServersByEpisodeId({ id });
-  const data = await extractHianimeServersByEpisodeId({ data: response });
+  const raw = await fetchHianimeServersByEpisodeId({ id });
+  const data = await extractHianimeServersByEpisodeId({ data: raw });
   
   return data;
+}
+
+export async function getHianimeSource({ episodeId, server, type }: { episodeId: string, server: string, type: "sub" | "dub" }) {
+  try {
+    const iframeData = await fetchHianimeIframeHtml({ episodeId, server, type });
+    const { dataId, fallbackServer, iframeUrl } = await extractHianimeDataId(iframeData);
+    const sourcesData = await fetchHianimeRawSources({ dataId, fallbackServer });
+
+    return {
+      id: episodeId,
+      type,
+      link: {
+        file: sourcesData?.sources?.file ?? "",
+        type: "hls",
+      },
+      tracks: sourcesData?.tracks ?? [],
+      intro: sourcesData?.intro ?? null,
+      outro: sourcesData?.outro ?? null,
+      iframe: iframeUrl,
+      server,
+    };
+  } catch (error) {
+    console.error(`getHianimeSource error for episode ${episodeId}:`, (error as Error).message);
+    return null;
+  }
 }

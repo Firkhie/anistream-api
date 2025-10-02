@@ -3,7 +3,7 @@ import { getAnilistByPreset, getAnilistDetailById, getAnilistCharactersById, get
 import { MediaVariables } from "../providers/anilist/anilist.types";
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus } from "../providers/anilist/anilist.enums";
 import { cleanQueries } from "../utils/helper";
-import { getHianimeServersByEpisodeId } from "../providers/hianime/hianime.service";
+import { getHianimeServersByEpisodeId, getHianimeSource } from "../providers/hianime/hianime.service";
 import { episodeMapper, Provider } from "../mappers/anime.mapper";
 
 const anime = express.Router();
@@ -151,6 +151,18 @@ anime.get("/servers/:episodeId", async (req, res) => {
   }
 })
 
+anime.get("/stream", async (req, res) => {
+  console.log("get stream api..")
+  const episodeId = String(req.query.episodeId);
+  const server = String(req.query.server);
+  const type = String(req.query.type) as "sub" | "dub";
+  try {
+    const data = await getHianimeSource({ episodeId, server, type })
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ status: "error", message: (error as Error).message });
+  }
+})
 
 
 export default anime;

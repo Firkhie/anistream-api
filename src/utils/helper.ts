@@ -2,6 +2,7 @@ import { compareTwoStrings } from 'string-similarity';
 import { MediaSeason } from "../providers/anilist/anilist.enums";
 import { MediaTitle } from "../providers/anilist/anilist.types";
 import { HianimeListResult } from '../providers/hianime/hianime.types';
+import { getHianimeServersByEpisodeId } from '../providers/hianime/hianime.service';
 
 export function getSeason(): MediaSeason {
   const month = new Date().getMonth() + 1;
@@ -49,4 +50,24 @@ export function findSimilarTitles({
   })
 
   return results.sort((a, b) => b.similarity - a.similarity);
+}
+
+export async function checkRequestedServers({ id, server, type }: { id: string, server: string, type: "sub" | "dub" }) {
+  const servers = await getHianimeServersByEpisodeId({ id });
+
+  let requestedServers = servers.filter((n) =>
+    n.serverName.toLowerCase() === server.toLowerCase() && 
+    n.type === type
+  )
+  
+  if (requestedServers.length === 0) {
+    requestedServers = servers.filter((n) => 
+      n.serverName.toLowerCase() === server.toLowerCase() && 
+      n.type === "raw"
+    )
+  }
+  if (requestedServers.length === 0) {
+    return false;
+  }
+  return true;
 }

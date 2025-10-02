@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { HianimeEpisodesResult, HianimeListResult } from "./hianime.types";
+import { HianimeEpisodesResult, HianimeListResult, HianimeServersResult } from "./hianime.types";
 
 export async function extractHianimeBySearch({ data }: { data: string }) {
   if (!data) return []
@@ -77,5 +77,14 @@ export async function extractHianimeServersByEpisodeId({ data }: { data: { statu
         serverName,
       });
     });
-    return result;
+    return result as HianimeServersResult[];
+}
+
+export async function extractHianimeDataId({ fallbackServer, iframeUrl, html }: { fallbackServer: string, iframeUrl: string, html: string } ) {
+  const $ = cheerio.load(html);
+  const dataId = $("#megaplay-player").attr("data-id");
+
+  if (!dataId) throw new Error("Unable to extract data-id from iframe HTML");
+
+  return { dataId, fallbackServer, iframeUrl };
 }
