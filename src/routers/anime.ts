@@ -164,5 +164,4 @@ anime.get("/stream", async (req, res) => {
   }
 })
 
-
 export default anime;

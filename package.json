@@ -1,14 +1,14 @@
 {
-  "name": "express-api-starter-ts",
-  "version": "2.0.0",
-  "description": "A basic starter for an express.js v5 API with Typescript",
-  "author": "CJ R. <cj@null.computer> (https://w3cj.now.sh)",
+  "name": "anistream-api",
+  "version": "1.0.0",
+  "description": "An API for anime information, episodes, and streaming sources.",
+  "author": "Firdig Alfalakhi <alfalakhie@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/w3cj/express-api-starter-ts.git"
+    "url": "https://github.com/Firkhie/anistream-api.git"
   },
-  "keywords": [],
+  "keywords":  ["anime", "api", "streaming", "episodes"],
   "main": "src/index.ts",
   "scripts": {
     "start": "node --env-file=.env dist/src/index.js",

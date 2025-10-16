@@ -11,19 +11,22 @@ export const redis =
   : null;
 
 const port = env.PORT;
-const server = app.listen(port, () => {
-  console.log(`Listening: http://localhost:${port}`);
-  if (!redis) {
-    console.log(`Redis not found. Cache disabled.`);
-  }
-});
 
-server.on("error", (err) => {
-  if ("code" in err && err.code === "EADDRINUSE") {
-    console.error(`Port ${env.PORT} is already in use. Please choose another port or stop the process using it.`);
-  }
-  else {
-    console.error("Failed to start server:", err);
-  }
-  process.exit(1);
-});
+if (process.env.NODE_ENV !== "test") {
+  const server = app.listen(port, () => {
+    console.log(`Listening: http://localhost:${port}`);
+    if (!redis) {
+      console.log(`Redis not found. Cache disabled.`);
+    }
+  });
+  
+  server.on("error", (err) => {
+    if ("code" in err && err.code === "EADDRINUSE") {
+      console.error(`Port ${env.PORT} is already in use. Please choose another port or stop the process using it.`);
+    }
+    else {
+      console.error("Failed to start server:", err);
+    }
+    process.exit(1);
+  });
+}
