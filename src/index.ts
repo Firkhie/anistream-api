@@ -12,7 +12,7 @@ export const redis =
 
 const port = env.PORT;
 
-if (process.env.NODE_ENV !== "test") {
+if (process.env.NODE_ENV === "development") {
   const server = app.listen(port, () => {
     console.log(`Listening: http://localhost:${port}`);
     if (!redis) {
