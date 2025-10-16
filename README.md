@@ -1,57 +1,43 @@
-# Express API Starter with Typescript
+<p align="center">
+  <a href="https://anistream.catco.uno/">
+    <img src="logo.png" alt="Logo" width="200" height="200">
+  </a>
+</p>
 
-A JavaScript Express v5 starter template with sensible defaults.
+<h1 align="center">
+  Anistream API
+</h1>
+<p align="center">
+  An API for anime information, episodes, and streaming sources.
+</p>
 
-How to use this template:
+Anistream scrapes data from various websites and provides APIs for accessing the data to satisfy your needs.
+
+> [!IMPORTANT]
+> Self-hosting the Anistream is required to use the API. Please refer to the [Installation section](#installation) for more information on hosting your own instance.
+
+> [!CAUTION]
+> Anistream is not affiliated with any of the providers it scrapes data from. Anistream is not responsible for any misuse of the data provided by the API. Commercial utilization may lead to serious consequences, including potential site takedown measures. Ensure that you understand the legal implications before using this API.
+
+<h2> Table of Contents </h2>
+
+- [Installation](#installation)
+  - [Locally](#locally)
+
+## Installation
+### Locally
+installation is simple.
+
+Run the following command to clone the repository, and install the dependencies.
 
 ```sh
-pnpm dlx create-express-api@latest --typescript --directory my-api-name
+$ git clone https://github.com/Firkhie/anistream-api.git
+$ cd anistream-api
+$ pnpm install
 ```
 
-Includes API Server utilities:
+start the server!
 
-- [morgan](https://www.npmjs.com/package/morgan)
-  - HTTP request logger middleware for node.js
-- [helmet](https://www.npmjs.com/package/helmet)
-  - Helmet helps you secure your Express apps by setting various HTTP headers. It's not a silver bullet, but it can help!
-- [cors](https://www.npmjs.com/package/cors)
-  - CORS is a node.js package for providing a Connect/Express middleware that can be used to enable CORS with various options.
-
-Development utilities:
-
-- [typescript](https://www.npmjs.com/package/typescript)
-  - TypeScript is a language for application-scale JavaScript.
-- [tsx](https://www.npmjs.com/package/tsx)
-  - The easiest way to run TypeScript in Node.js
-- [eslint](https://www.npmjs.com/package/eslint)
-  - ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code.
-- [vitest](https://www.npmjs.com/package/vitest)
-  - Next generation testing framework powered by Vite.
-- [zod](https://www.npmjs.com/package/zod)
-  - Validated TypeSafe env with zod schema
-- [supertest](https://www.npmjs.com/package/supertest)
-  - HTTP assertions made easy via superagent.
-
-## Setup
-
-```
-pnpm install
-```
-
-## Lint
-
-```
-pnpm run lint
-```
-
-## Test
-
-```
-pnpm run test
-```
-
-## Development
-
-```
-pnpm run dev
+```sh
+$ pnpm run dev
 ```
