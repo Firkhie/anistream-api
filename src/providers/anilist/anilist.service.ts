@@ -18,6 +18,8 @@ const animePreset: Record<PresetName, Partial<MediaVariables>> = {
     type: MediaType.ANIME,
     sort: [MediaSort.TRENDING_DESC],
     formatIn: [MediaFormat.TV],
+    seasonYear: new Date().getFullYear(),
+    season: getSeason()
   },
   newest: {
     type: MediaType.ANIME,
@@ -68,6 +70,7 @@ export async function getAnilistByPreset({ preset, page, perPage }: { preset: Pr
         userPreferred: item.title?.userPreferred ?? null,
       },
       format: item.format ?? null,
+      description: item.description ?? null,
       status: item.status ?? null,
       totalEpisodes: item.episodes ?? null,
       currentEpisodes: item.nextAiringEpisode
@@ -155,6 +158,7 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
         userPreferred: item.title?.userPreferred ?? null,
       },
       format: item.format ?? null,
+      description: item.description ?? null,
       status: item.status ?? null,
       totalEpisodes: item.episodes ?? null,
       currentEpisodes: item.nextAiringEpisode
@@ -209,6 +213,7 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
         userPreferred: item.media.title?.userPreferred ?? null,
       },
       format: item.media.format ?? null,
+      description: item.description ?? null,
       status: item.media.status ?? null,
       totalEpisodes: item.media.episodes ?? null,
       currentEpisodes: item.media.nextAiringEpisode

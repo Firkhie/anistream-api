@@ -12,7 +12,6 @@ import {
 } from "./anilist.enums";
 
 export type AnimeDetail = AnimeBasic & {
-  description: string | null;
   startDate: FuzzyDate | null;
   endDate: FuzzyDate | null;
   season: MediaSeason | null;
@@ -37,6 +36,7 @@ export type AnimeBasic = {
   idMal: string | null;
   title: MediaTitle | null;
   format: MediaFormat | null;
+  description: string | null;
   status: MediaStatus | null;
   totalEpisodes: number | null;
   currentEpisodes: number | null;
