@@ -38,7 +38,7 @@ export type AnimeBasic = {
   season: MediaSeason | null;
   seasonYear: number | null;
   totalEpisodes: number | null;
-  currentEpisodes: number | null;
+  currentEpisode: number | null;
   color: string | null;
   coverImage: string | null;
   bannerImage: string | null;

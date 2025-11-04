@@ -75,7 +75,7 @@ export async function getAnilistByPreset({ preset, page, perPage }: { preset: Pr
       season: item.season ?? null,
       seasonYear: item.seasonYear ?? null,
       totalEpisodes: item.episodes ?? null,
-      currentEpisodes: item.nextAiringEpisode
+      currentEpisode: item.nextAiringEpisode
         ? (item.nextAiringEpisode.episode ?? 1) - 1
         : item.episodes ?? null,
       color: item.coverImage?.color ?? null,
@@ -166,7 +166,7 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
       season: item.season ?? null,
       seasonYear: item.seasonYear ?? null,
       totalEpisodes: item.episodes ?? null,
-      currentEpisodes: item.nextAiringEpisode
+      currentEpisode: item.nextAiringEpisode
         ? (item.nextAiringEpisode.episode ?? 1) - 1
         : item.episodes ?? null,
       color: item.coverImage?.color ?? null,
@@ -224,7 +224,7 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
       season: item.season ?? null,
       seasonYear: item.seasonYear ?? null,
       totalEpisodes: item.media.episodes ?? null,
-      currentEpisodes: item.media.nextAiringEpisode
+      currentEpisode: item.media.nextAiringEpisode
         ? (item.media.nextAiringEpisode.episode ?? 1) - 1
         : item.media.episodes ?? null,
       color: item.media.coverImage?.color ?? null,
@@ -297,7 +297,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
     season: data.season ?? null,
     seasonYear: data.seasonYear ?? null,
     totalEpisodes: data.episodes ?? null,
-    currentEpisodes: data.nextAiringEpisode
+    currentEpisode: data.nextAiringEpisode
       ? (data.nextAiringEpisode.episode ?? 1) - 1
       : data.episodes ?? null,
     duration: data.duration ?? null,
@@ -352,7 +352,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
             season: item.node.season ?? null,
             seasonYear: item.node.seasonYear ?? null,
             totalEpisodes: item.node.episodes ?? null,
-            currentEpisodes: item.node.nextAiringEpisode
+            currentEpisode: item.node.nextAiringEpisode
               ? (item.node.nextAiringEpisode.episode ?? 1) - 1
               : item.node.episodes ?? null,
             color: item.node.coverImage?.color ?? null,
@@ -422,7 +422,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
             season: rec.season ?? null,
             seasonYear: rec.seasonYear ?? null,
             totalEpisodes: rec.episodes ?? null,
-            currentEpisodes: rec.nextAiringEpisode
+            currentEpisode: rec.nextAiringEpisode
               ? (rec.nextAiringEpisode.episode ?? 1) - 1
               : rec.episodes ?? null,
             color: rec.coverImage?.color ?? null,
