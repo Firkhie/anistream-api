@@ -14,13 +14,10 @@ import {
 export type AnimeDetail = AnimeBasic & {
   startDate: FuzzyDate | null;
   endDate: FuzzyDate | null;
-  season: MediaSeason | null;
-  seasonYear: number | null;
   duration: number | null;
   countryOfOrigin: string | null;
   isLicensed: boolean | null;
   trailer: MediaTrailer | null;
-  genres: GenreCollection[] | null;
   synonyms: string[] | null;
   isAdult: boolean | null;
   popularity: number | null;
@@ -36,13 +33,16 @@ export type AnimeBasic = {
   idMal: string | null;
   title: MediaTitle | null;
   format: MediaFormat | null;
-  description: string | null;
   status: MediaStatus | null;
+  description: string | null;
+  season: MediaSeason | null;
+  seasonYear: number | null;
   totalEpisodes: number | null;
   currentEpisodes: number | null;
   color: string | null;
   coverImage: string | null;
   bannerImage: string | null;
+  genres: GenreCollection[] | null;
   rating: number | null;
   nextAiringEpisode: AiringSchedule | null;
 };
