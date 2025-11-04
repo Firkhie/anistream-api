@@ -72,8 +72,8 @@ export async function getAnilistByPreset({ preset, page, perPage }: { preset: Pr
       format: item.format ?? null,
       status: item.status ?? null,
       description: item.description ?? null,
-      season: data.season ?? null,
-      seasonYear: data.seasonYear ?? null,
+      season: item.season ?? null,
+      seasonYear: item.seasonYear ?? null,
       totalEpisodes: item.episodes ?? null,
       currentEpisodes: item.nextAiringEpisode
         ? (item.nextAiringEpisode.episode ?? 1) - 1
@@ -85,7 +85,7 @@ export async function getAnilistByPreset({ preset, page, perPage }: { preset: Pr
         item.coverImage?.medium ??
         null,
       bannerImage: item.bannerImage ?? null,
-      genres: data.genres ?? [],
+      genres: item.genres ?? [],
       rating: item.averageScore ?? null,
       nextAiringEpisode: item.nextAiringEpisode
         ? {
@@ -163,8 +163,8 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
       format: item.format ?? null,
       status: item.status ?? null,
       description: item.description ?? null,
-      season: data.season ?? null,
-      seasonYear: data.seasonYear ?? null,
+      season: item.season ?? null,
+      seasonYear: item.seasonYear ?? null,
       totalEpisodes: item.episodes ?? null,
       currentEpisodes: item.nextAiringEpisode
         ? (item.nextAiringEpisode.episode ?? 1) - 1
@@ -176,7 +176,7 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
         item.coverImage?.medium ??
         null,
       bannerImage: item.bannerImage ?? null,
-      genres: data.genres ?? [],
+      genres: item.genres ?? [],
       rating: item.averageScore ?? null,
       nextAiringEpisode: item.nextAiringEpisode
         ? {
@@ -221,8 +221,8 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
       format: item.media.format ?? null,
       status: item.media.status ?? null,
       description: item.description ?? null,
-      season: data.season ?? null,
-      seasonYear: data.seasonYear ?? null,
+      season: item.season ?? null,
+      seasonYear: item.seasonYear ?? null,
       totalEpisodes: item.media.episodes ?? null,
       currentEpisodes: item.media.nextAiringEpisode
         ? (item.media.nextAiringEpisode.episode ?? 1) - 1
@@ -234,7 +234,7 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
         item.media.coverImage?.medium ??
         null,
       bannerImage: item.media.bannerImage ?? null,
-      genres: data.genres ?? [],
+      genres: item.genres ?? [],
       rating: item.media.averageScore ?? null,
       nextAiringEpisode: item.media.nextAiringEpisode
         ? {
@@ -348,6 +348,9 @@ export async function getAnilistDetailById({ id }: { id: string }) {
             },
             format: item.node.format,
             status: item.node.status ?? null,
+            description: item.node.description ?? null,
+            season: item.node.season ?? null,
+            seasonYear: item.node.seasonYear ?? null,
             totalEpisodes: item.node.episodes ?? null,
             currentEpisodes: item.node.nextAiringEpisode
               ? (item.node.nextAiringEpisode.episode ?? 1) - 1
@@ -359,7 +362,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
               item.node.coverImage?.medium ??
               null,
             bannerImage: item.node.bannerImage ?? null,
-            genres: data.genres ?? [],
+            genres: item.node.genres ?? [],
             rating: item.node.averageScore ?? null,
             relationType: item.relationType,
             nextAiringEpisode: item.node.nextAiringEpisode
@@ -415,6 +418,9 @@ export async function getAnilistDetailById({ id }: { id: string }) {
             },
             format: rec.format,
             status: rec.status ?? null,
+            description: rec.description ?? null,
+            season: rec.season ?? null,
+            seasonYear: rec.seasonYear ?? null,
             totalEpisodes: rec.episodes ?? null,
             currentEpisodes: rec.nextAiringEpisode
               ? (rec.nextAiringEpisode.episode ?? 1) - 1
@@ -423,7 +429,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
             coverImage:
               rec.coverImage?.extraLarge ?? rec.coverImage?.large ?? rec.coverImage?.medium ?? null,
             bannerImage: rec.bannerImage ?? null,
-            genres: data.genres ?? [],
+            genres: rec.genres ?? [],
             rating: rec.averageScore ?? null,
             nextAiringEpisode: rec.nextAiringEpisode
               ? {
