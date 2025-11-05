@@ -5,6 +5,8 @@ import { getHianimeEpisodesById, getHianimeMapper } from "../providers/hianime/h
 export type Provider = "hianime" | "animekai"
 export async function episodeMapper({ id, provider = "hianime" }: { id: string, provider: Provider }) {
   const ids = await animeMapper({ id })
+  if (!ids) return [];
+
   const episodes = await getAnizipEpisodesById({ id })
 
   const providerIdKey = `${provider}Id` as keyof typeof ids
@@ -35,7 +37,10 @@ export async function episodeMapper({ id, provider = "hianime" }: { id: string, 
 
 export async function animeMapper({ id }: { id: string }) {
   const anilistData = await getAnilistTitleById({ id });
-  const hianimeData = await getHianimeMapper({ title: anilistData });
+
+  if (anilistData.status === "NOT_YET_RELEASED") return null;
+
+  const hianimeData = await getHianimeMapper({ title: anilistData.title });
 
   return {
     anilistId: id,

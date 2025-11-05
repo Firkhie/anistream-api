@@ -495,7 +495,7 @@ export async function getAnilistCharactersById({ id, page, perPage }: { id: stri
 
 export async function getAnilistTitleById({ id }: { id: string }) {
   const variables = { id }
-  const data = (await fetchAnilist({ query: anilistTitleQuery, variables })).data.Media.title;
+  const data = (await fetchAnilist({ query: anilistTitleQuery, variables })).data.Media;
 
   return data;
 }
