@@ -4,29 +4,37 @@ import { extractHianimeBySearch, extractHianimeDataId, extractHianimeEpisodesByI
 import { fetchHianimeBySearch, fetchHianimeEpisodesById, fetchHianimeIframeHtml, fetchHianimeRawSources, fetchHianimeServersByEpisodeId } from "./hianime.fetch";
 
 export async function getHianimeMapper({ title }: { title: MediaTitle }) {
-  const searchResults = await getHianimeBySearch({ title })
+  const searchResults = await getHianimeBySearch({ title });
   if (!searchResults.length) return { id: null };
 
-  const mapped = [
-    ...findSimilarTitles({
-      inputTitle: title.english!,
-      titles: searchResults,
-      type: "english",
-    }),
-    ...findSimilarTitles({
-      inputTitle: title.romaji!,
-      titles: searchResults,
-      type: "romaji",
-    }),
-  ];
+  // Get results for both English and Romaji
+  const englishResults = findSimilarTitles({
+    inputTitle: title.english!,
+    titles: searchResults,
+    type: "english",
+  });
 
-  const uniqueResults = Array.from(
-    new Set(mapped.map((item) => JSON.stringify(item)))
-  ).map((str) => JSON.parse(str));
+  const romajiResults = findSimilarTitles({
+    inputTitle: title.romaji!,
+    titles: searchResults,
+    type: "romaji",
+  });
 
-  uniqueResults.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
+  // Combine and keep only the best match for each ID
+  const allResults = [...englishResults, ...romajiResults];
+  const bestMatches = new Map();
 
-  return { id: uniqueResults[0].id ?? null }
+  allResults.forEach((item) => {
+    const current = bestMatches.get(item.id);
+    if (!current || item.similarity > current.similarity) {
+      bestMatches.set(item.id, item);
+    }
+  });
+
+  const finalResults = Array.from(bestMatches.values())
+    .sort((a, b) => b.similarity - a.similarity);
+
+  return { id: finalResults[0]?.id ?? null };
 }
 
 export async function getHianimeBySearch({ title }: { title: MediaTitle }) {

@@ -6,8 +6,14 @@ export type Provider = "hianime" | "animekai"
 export async function episodeMapper({ id, provider = "hianime" }: { id: string, provider: Provider }) {
   const ids = await animeMapper({ id })
   const episodes = await getAnizipEpisodesById({ id })
+
+  const providerIdKey = `${provider}Id` as keyof typeof ids
+  const providerId = ids[providerIdKey]
+
+  if (!providerId) return []
   
   let epsSource: any = []
+  
   switch (provider) {
     case "hianime":
       epsSource = await getHianimeEpisodesById({ id: ids.hianimeId })
@@ -17,6 +23,8 @@ export async function episodeMapper({ id, provider = "hianime" }: { id: string, 
       epsSource = await getHianimeEpisodesById({ id: ids.hianimeId })
       break;
   }
+  
+  if (epsSource.length === 0) return []
 
   const mergedEpisodes = epsSource.episodes.map((item: any) => {
     return { id: item.id, ...episodes[String(item.episode_no)] }

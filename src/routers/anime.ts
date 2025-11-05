@@ -10,8 +10,8 @@ const anime = express.Router();
 
 anime.get("/popular", async (req, res) => {
   console.log("get anime popular api..")
-  const page = Number(req.query.page) || 1;
-  const perPage = Number(req.query.perPage) || 20;
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const perPage = req.query.perPage ? Number(req.query.perPage) : 20;
   try {
     const data = await getAnilistByPreset({ preset: "popular", page, perPage })
     res.status(200).json(data);
@@ -22,8 +22,8 @@ anime.get("/popular", async (req, res) => {
 
 anime.get("/trending", async (req, res) => {
   console.log("get anime trending api..")
-  const page = Number(req.query.page) || 1;
-  const perPage = Number(req.query.perPage) || 20;
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const perPage = req.query.perPage ? Number(req.query.perPage) : 20;
   try {
     const data = await getAnilistByPreset({ preset: "trending", page, perPage })
     res.status(200).json(data);
@@ -34,8 +34,8 @@ anime.get("/trending", async (req, res) => {
 
 anime.get("/newest", async (req, res) => {
   console.log("get anime newest api..")
-  const page = Number(req.query.page) || 1;
-  const perPage = Number(req.query.perPage) || 20;
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const perPage = req.query.perPage ? Number(req.query.perPage) : 20;
   try {
     const data = await getAnilistByPreset({ preset: "newest", page, perPage })
     res.status(200).json(data);
@@ -46,8 +46,8 @@ anime.get("/newest", async (req, res) => {
 
 anime.get("/upcoming", async (req, res) => {
   console.log("get anime upcoming api..")
-  const page = Number(req.query.page) || 1;
-  const perPage = Number(req.query.perPage) || 20;
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const perPage = req.query.perPage ? Number(req.query.perPage) : 20;
   try {
     const data = await getAnilistByPreset({ preset: "upcoming", page, perPage })
     res.status(200).json(data);
@@ -59,8 +59,8 @@ anime.get("/upcoming", async (req, res) => {
 anime.get("/search", async (req, res) => {
   console.log("get anime search api..")
   const queries: MediaVariables = {
-    page: Number(req.query.page) || 1,
-    perPage: Number(req.query.perPage) || 20,
+    page: req.query.page ? Number(req.query.page) : 1,
+    perPage: req.query.perPage ? Number(req.query.perPage) : 20,
     season: req.query.season ? req.query.season as MediaSeason : undefined,
     seasonYear: req.query.seasonYear ? Number(req.query.seasonYear) : undefined,
     format: req.query.format ? req.query.format as MediaFormat : undefined,
@@ -71,7 +71,7 @@ anime.get("/search", async (req, res) => {
     averageScoreLesser: req.query.averageScoreLesser ? Number(req.query.averageScoreLesser) : undefined,
     genreIn: req.query.genreIn ? String(req.query.genreIn).split(',') as GenreCollection[] : undefined,
     sort: req.query.sort ? String(req.query.sort).split(',') as MediaSort[] : undefined,
-  }
+  };
   const cleanedQueries = cleanQueries({ queries });
   try {
     const data = await getAnilistBySearch({ variables: cleanedQueries as MediaVariables })
@@ -83,9 +83,9 @@ anime.get("/search", async (req, res) => {
 
 anime.get("/airing", async (req, res) => {
   console.log("get anime airing api..")
-  const days = Number(req.query.days) || 7;
-  const page = Number(req.query.page) || 1;
-  const perPage = Number(req.query.perPage) || 20;
+  const days = req.query.days ? Number(req.query.days) : 7;
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const perPage = req.query.perPage ? Number(req.query.perPage) : 20;
   try {
     const data = await getAnilistAiringSchedule({ days, page, perPage })
     res.status(200).json(data);
@@ -118,8 +118,8 @@ anime.get("/detail/:id", async (req, res) => {
 anime.get("/detail/:id/characters", async (req, res) => {
   console.log("get anime detail characters api..")
   const { id } = req.params
-  const page = Number(req.query.page) || 1;
-  const perPage = Number(req.query.perPage) || 20;
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const perPage = req.query.perPage ? Number(req.query.perPage) : 20;
   try {
     const data = await getAnilistCharactersById({ id, page, perPage })
     res.status(200).json(data);
@@ -131,7 +131,7 @@ anime.get("/detail/:id/characters", async (req, res) => {
 anime.get("/episodes/:id", async (req, res) => {
   console.log("get episodes api..")
   const { id } = req.params;
-  const provider: Provider = String(req.query.provider) as Provider || "hianime";
+  const provider = (req.query.provider ? String(req.query.provider) : "hianime") as Provider;
   try {
     const data = await episodeMapper({ id, provider })
     res.status(200).json(data);
@@ -153,9 +153,9 @@ anime.get("/servers/:episodeId", async (req, res) => {
 
 anime.get("/stream", async (req, res) => {
   console.log("get stream api..")
-  const episodeId = String(req.query.episodeId);
-  const server = String(req.query.server);
-  const type = String(req.query.type) as "sub" | "dub";
+  const episodeId = req.query.episodeId ? String(req.query.episodeId) : "";
+  const server = req.query.server ? String(req.query.server) : "";
+  const type = req.query.type ? String(req.query.type) as "sub" | "dub" : "sub";
   try {
     const data = await getHianimeSource({ episodeId, server, type })
     res.status(200).json(data);
