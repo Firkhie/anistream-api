@@ -69,7 +69,7 @@ anime.get("/search", async (req, res) => {
     search: req.query.search ? String(req.query.search) : undefined,
     averageScoreGreater: req.query.averageScoreGreater ? Number(req.query.averageScoreGreater) : undefined,
     averageScoreLesser: req.query.averageScoreLesser ? Number(req.query.averageScoreLesser) : undefined,
-    genreIn: req.query.genreIn ? String(req.query.genreIn).split(',') as GenreCollection[] : undefined,
+    genreIn: req.query.genres ? String(req.query.genres).split(',') as GenreCollection[] : undefined, // My FE already uses "genres" instead of "genreIn", so we map it here for compatibility
     sort: req.query.sort ? String(req.query.sort).split(',') as MediaSort[] : undefined,
   };
   const cleanedQueries = cleanQueries({ queries });
