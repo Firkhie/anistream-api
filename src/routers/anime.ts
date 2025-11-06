@@ -66,7 +66,7 @@ anime.get("/search", async (req, res) => {
     format: req.query.format ? req.query.format as MediaFormat : undefined,
     status: req.query.status ? req.query.status as MediaStatus : undefined,
     isAdult: Boolean(req.query.isAdult),
-    search: req.query.search ? String(req.query.search) : undefined,
+    search: req.query.query ? String(req.query.query) : undefined, // FE Query use 'query'
     averageScoreGreater: req.query.averageScoreGreater ? Number(req.query.averageScoreGreater) : undefined,
     averageScoreLesser: req.query.averageScoreLesser ? Number(req.query.averageScoreLesser) : undefined,
     genreIn: req.query.genres ? String(req.query.genres).split(',') as GenreCollection[] : undefined, // FE Query use 'genres'
