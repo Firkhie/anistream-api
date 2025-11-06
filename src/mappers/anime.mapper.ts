@@ -40,7 +40,7 @@ export async function animeMapper({ id }: { id: string }) {
 
   if (anilistData.status === "NOT_YET_RELEASED") return null;
 
-  const hianimeData = await getHianimeMapper({ title: anilistData.title });
+  const hianimeData = await getHianimeMapper({ title: anilistData.title, format: anilistData.format });
 
   return {
     anilistId: id,

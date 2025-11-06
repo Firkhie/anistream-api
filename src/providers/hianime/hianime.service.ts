@@ -1,24 +1,31 @@
 import { findSimilarTitles } from "../../utils/helper";
+import { MediaFormat } from "../anilist/anilist.enums";
 import { MediaTitle } from "../anilist/anilist.types";
 import { extractHianimeBySearch, extractHianimeDataId, extractHianimeEpisodesById, extractHianimeServersByEpisodeId } from "./hianime.extractor";
 import { fetchHianimeBySearch, fetchHianimeEpisodesById, fetchHianimeIframeHtml, fetchHianimeRawSources, fetchHianimeServersByEpisodeId } from "./hianime.fetch";
 
-export async function getHianimeMapper({ title }: { title: MediaTitle }) {
+export async function getHianimeMapper({ title, format }: { title: MediaTitle, format: MediaFormat }) {
   const searchResults = await getHianimeBySearch({ title });
   if (!searchResults.length) return { id: null };
 
-  // Get results for both English and Romaji
-  const englishResults = findSimilarTitles({
-    inputTitle: title.english!,
-    titles: searchResults,
-    type: "english",
+  // Filter results by format
+  const filteredResults = searchResults.filter(result => {
+    if (!result.format) return true; // Keep if no format info
+    return result.format.toLowerCase() === format.toLowerCase();
   });
 
-  const romajiResults = findSimilarTitles({
-    inputTitle: title.romaji!,
-    titles: searchResults,
+  // Get results for both English and Romaji
+  const englishResults = title.english ? findSimilarTitles({
+    inputTitle: title.english,
+    titles: filteredResults,
+    type: "english",
+  }) : [];
+
+  const romajiResults = title.romaji ? findSimilarTitles({
+    inputTitle: title.romaji,
+    titles: filteredResults,
     type: "romaji",
-  });
+  }) : [];
 
   // Combine and keep only the best match for each ID
   const allResults = [...englishResults, ...romajiResults];

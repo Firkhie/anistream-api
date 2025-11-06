@@ -18,6 +18,11 @@ export async function extractHianimeBySearch({ data }: { data: string }) {
         .split("?ref=search")[0] || null;
     result.push({
       id: id,
+      format: $(el)
+        .find(".film-detail .fd-infor .fdi-item")
+        .first()
+        .text()
+        .trim() || null,
       title: {
         romaji:
           $(el)

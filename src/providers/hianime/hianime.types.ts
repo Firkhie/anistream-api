@@ -11,6 +11,7 @@ export type HianimeEpisodesResult = {
 
 export type HianimeListResult = {
   id: string | null;
+  format: string | null;
   title: {
     english: string | null;
     romaji: string | null;
