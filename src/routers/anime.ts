@@ -62,14 +62,14 @@ anime.get("/search", async (req, res) => {
     page: req.query.page ? Number(req.query.page) : 1,
     perPage: req.query.perPage ? Number(req.query.perPage) : 20,
     season: req.query.season ? req.query.season as MediaSeason : undefined,
-    seasonYear: req.query.seasonYear ? Number(req.query.seasonYear) : undefined,
+    seasonYear: req.query.year ? Number(req.query.year) : undefined,  // FE Query use 'year'
     format: req.query.format ? req.query.format as MediaFormat : undefined,
     status: req.query.status ? req.query.status as MediaStatus : undefined,
     isAdult: Boolean(req.query.isAdult),
     search: req.query.search ? String(req.query.search) : undefined,
     averageScoreGreater: req.query.averageScoreGreater ? Number(req.query.averageScoreGreater) : undefined,
     averageScoreLesser: req.query.averageScoreLesser ? Number(req.query.averageScoreLesser) : undefined,
-    genreIn: req.query.genres ? String(req.query.genres).split(',') as GenreCollection[] : undefined, // My FE already uses "genres" instead of "genreIn", so we map it here for compatibility
+    genreIn: req.query.genres ? String(req.query.genres).split(',') as GenreCollection[] : undefined, // FE Query use 'genres'
     sort: req.query.sort ? String(req.query.sort).split(',') as MediaSort[] : undefined,
   };
   const cleanedQueries = cleanQueries({ queries });

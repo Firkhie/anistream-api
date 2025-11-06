@@ -73,7 +73,7 @@ export async function getAnilistByPreset({ preset, page, perPage }: { preset: Pr
       status: item.status ?? null,
       description: item.description ?? null,
       season: item.season ?? null,
-      seasonYear: item.seasonYear ?? null,
+      year: item.seasonYear ?? null,
       totalEpisodes: item.episodes ?? null,
       currentEpisode: item.nextAiringEpisode
         ? (item.nextAiringEpisode.episode ?? 1) - 1
@@ -164,7 +164,7 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
       status: item.status ?? null,
       description: item.description ?? null,
       season: item.season ?? null,
-      seasonYear: item.seasonYear ?? null,
+      year: item.seasonYear ?? null,
       totalEpisodes: item.episodes ?? null,
       currentEpisode: item.nextAiringEpisode
         ? (item.nextAiringEpisode.episode ?? 1) - 1
@@ -222,7 +222,7 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
       status: item.media.status ?? null,
       description: item.description ?? null,
       season: item.season ?? null,
-      seasonYear: item.seasonYear ?? null,
+      year: item.seasonYear ?? null,
       totalEpisodes: item.media.episodes ?? null,
       currentEpisode: item.media.nextAiringEpisode
         ? (item.media.nextAiringEpisode.episode ?? 1) - 1
@@ -295,7 +295,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
       day: data.endDate?.day ?? null,
     },
     season: data.season ?? null,
-    seasonYear: data.seasonYear ?? null,
+    year: data.seasonYear ?? null,
     totalEpisodes: data.episodes ?? null,
     currentEpisode: data.nextAiringEpisode
       ? (data.nextAiringEpisode.episode ?? 1) - 1
@@ -350,7 +350,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
             status: item.node.status ?? null,
             description: item.node.description ?? null,
             season: item.node.season ?? null,
-            seasonYear: item.node.seasonYear ?? null,
+            year: item.node.seasonYear ?? null,
             totalEpisodes: item.node.episodes ?? null,
             currentEpisode: item.node.nextAiringEpisode
               ? (item.node.nextAiringEpisode.episode ?? 1) - 1
@@ -420,7 +420,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
             status: rec.status ?? null,
             description: rec.description ?? null,
             season: rec.season ?? null,
-            seasonYear: rec.seasonYear ?? null,
+            year: rec.seasonYear ?? null,
             totalEpisodes: rec.episodes ?? null,
             currentEpisode: rec.nextAiringEpisode
               ? (rec.nextAiringEpisode.episode ?? 1) - 1
