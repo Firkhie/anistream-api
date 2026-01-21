@@ -1,5 +1,5 @@
 import express from "express";
-import { getAnilistByPreset, getAnilistDetailById, getAnilistCharactersById, getAnilistDetailByRandom, getAnilistBySearch, getAnilistAiringSchedule } from "../providers/anilist/anilist.service";
+import { getAnilistByPreset, getAnilistDetailById, getAnilistCharactersById, getAnilistDetailByRandom, getAnilistBySearch, getAnilistAiringSchedule, getAnilistTitleById } from "../providers/anilist/anilist.service";
 import { MediaVariables } from "../providers/anilist/anilist.types";
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus } from "../providers/anilist/anilist.enums";
 import { cleanQueries } from "../utils/helper";
@@ -98,6 +98,17 @@ anime.get("/random", async (req, res) => {
   console.log("get anime random api..")
   try {
     const data = await getAnilistDetailByRandom()
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ status: "error", message: (error as Error).message });
+  }
+});
+
+anime.get("/base/:id", async (req, res) => {
+  console.log("get anime basic api..")
+  const { id } = req.params
+  try {
+    const data = await getAnilistTitleById({ id })
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
