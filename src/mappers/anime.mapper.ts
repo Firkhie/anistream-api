@@ -29,7 +29,7 @@ export async function episodeMapper({ id, provider = "hianime" }: { id: string, 
   if (epsSource.length === 0) return []
 
   const mergedEpisodes = epsSource.episodes.map((item: any) => {
-    return { id: item.id, ...episodes[String(item.episode_no)] }
+    return { id: item.id, provider, ...episodes[String(item.episode_no)] }
   })  
 
   return mergedEpisodes;

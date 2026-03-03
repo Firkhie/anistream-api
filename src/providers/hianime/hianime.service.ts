@@ -1,8 +1,9 @@
 import { findSimilarTitles } from "../../utils/helper";
 import { MediaFormat } from "../anilist/anilist.enums";
 import { MediaTitle } from "../anilist/anilist.types";
-import { extractHianimeBySearch, extractHianimeDataId, extractHianimeEpisodesById, extractHianimeServersByEpisodeId } from "./hianime.extractor";
-import { fetchHianimeBySearch, fetchHianimeEpisodesById, fetchHianimeIframeHtml, fetchHianimeRawSources, fetchHianimeServersByEpisodeId } from "./hianime.fetch";
+import { decryptHianimeData } from "./hianime.decryptor";
+import { extractHianimeBySearch, extractHianimeEpisodesById, extractHianimeServersByEpisodeId } from "./hianime.extractor";
+import { fetchHianimeBySearch, fetchHianimeEpisodesById, fetchHianimeServersByEpisodeId } from "./hianime.fetch";
 
 export async function getHianimeMapper({ title, format }: { title: MediaTitle, format: MediaFormat }) {
   const searchResults = await getHianimeBySearch({ title });
@@ -59,33 +60,48 @@ export async function getHianimeEpisodesById({ id }: { id: string }) {
 }
 
 export async function getHianimeServersByEpisodeId({ id }: { id: string }) {
-  const raw = await fetchHianimeServersByEpisodeId({ id });
+  const epsId = id.split('ep=')[1];
+  const raw = await fetchHianimeServersByEpisodeId({ id: epsId });
   const data = await extractHianimeServersByEpisodeId({ data: raw });
   
   return data;
 }
 
-export async function getHianimeSource({ episodeId, server, type }: { episodeId: string, server: string, type: "sub" | "dub" }) {
+export async function getHianimeSource({ id, server, type }: { id: string, server: string, type: "sub" | "dub" }) {
   try {
-    const iframeData = await fetchHianimeIframeHtml({ episodeId, server, type });
-    const { dataId, fallbackServer, iframeUrl } = await extractHianimeDataId(iframeData);
-    const sourcesData = await fetchHianimeRawSources({ dataId, fallbackServer });
+    // Servers
+    const servers = await getHianimeServersByEpisodeId({ id })
+    let requestedServer = servers.filter(
+      (n) =>
+        n.serverName.toLowerCase() === server.toLowerCase() &&
+        n.type.toLowerCase() === type.toLowerCase()
+    );
+    if (requestedServer.length === 0) {
+      requestedServer = servers.filter(
+        (n) =>
+          n.serverName.toLowerCase() === server.toLowerCase() &&
+          n.type.toLowerCase() === "raw"
+      );
+    }
+    if (requestedServer.length === 0) {
+      throw new Error(
+        `No matching server found for name: ${name}, type: ${type}`
+      );
+    }
 
-    return {
-      id: episodeId,
-      type,
-      link: {
-        file: sourcesData?.sources?.file ?? "",
-        type: "hls",
-      },
-      tracks: sourcesData?.tracks ?? [],
-      intro: sourcesData?.intro ?? null,
-      outro: sourcesData?.outro ?? null,
-      iframe: iframeUrl,
+    // Stream Link
+    const epsId = id.split('ep=')[1];
+    const streamingLink = await decryptHianimeData({ 
+      epId: id, 
+      id: requestedServer[0].data_id,
       server,
-    };
+      type,
+      fallback: false
+    });
+    
+    return { streamingLink, servers };
   } catch (error) {
-    console.error(`getHianimeSource error for episode ${episodeId}:`, (error as Error).message);
+    console.error(`getHianimeSource error for episode ${id}:`, (error as Error).message);
     return null;
   }
 }
