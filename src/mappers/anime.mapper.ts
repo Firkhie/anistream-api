@@ -1,8 +1,9 @@
 import { getAnilistTitleById } from "../providers/anilist/anilist.service";
 import { getAnizipEpisodesById } from "../providers/anizip/anizip.service";
 import { getHianimeEpisodesById, getHianimeMapper } from "../providers/hianime/hianime.service";
+import { getYumaapiEpisodesById } from "../providers/yumaapi/yumaapi.service";
 
-export type Provider = "hianime" | "animekai"
+export type Provider = "hianime" | "yumaapi"
 export async function episodeMapper({ id, provider = "hianime" }: { id: string, provider: Provider }) {
   const ids = await animeMapper({ id })
   if (!ids) return [];
@@ -11,7 +12,6 @@ export async function episodeMapper({ id, provider = "hianime" }: { id: string, 
 
   const providerIdKey = `${provider}Id` as keyof typeof ids
   const providerId = ids[providerIdKey]
-
   if (!providerId) return []
   
   let epsSource: any = []
@@ -20,9 +20,9 @@ export async function episodeMapper({ id, provider = "hianime" }: { id: string, 
     case "hianime":
       epsSource = await getHianimeEpisodesById({ id: ids.hianimeId })
       break;
-  
-    default:
-      epsSource = await getHianimeEpisodesById({ id: ids.hianimeId })
+
+    case "yumaapi":
+      epsSource = await getYumaapiEpisodesById({ id: ids.yumaapiId })
       break;
   }
   
@@ -44,6 +44,7 @@ export async function animeMapper({ id }: { id: string }) {
 
   return {
     anilistId: id,
-    hianimeId: hianimeData?.id ?? null
+    hianimeId: hianimeData?.id ?? null,
+    yumaapiId: hianimeData?.id ?? null,
   }
 }

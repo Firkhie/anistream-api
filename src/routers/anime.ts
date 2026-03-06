@@ -5,6 +5,7 @@ import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus } fro
 import { cleanQueries } from "../utils/helper";
 import { getHianimeServersByEpisodeId, getHianimeSource } from "../providers/hianime/hianime.service";
 import { episodeMapper, Provider } from "../mappers/anime.mapper";
+import { getYumaapiSource } from "../providers/yumaapi/yumaapi.service";
 
 const anime = express.Router();
 
@@ -164,11 +165,19 @@ anime.get("/servers", async (req, res) => {
 
 anime.get("/stream", async (req, res) => {
   console.log("get stream api..")
+  const source = req.query.source ? String(req.query.source) : "hianime";
   const id = req.query.id ? String(req.query.id) : "";
   const server = req.query.server ? String(req.query.server) : "hd-1";
   const type = req.query.type ? String(req.query.type) as "sub" | "dub" : "sub";
   try {
-    const data = await getHianimeSource({ id, server, type })
+    let data;
+
+    if (source === "yumaapi") {
+      data = await getYumaapiSource({ id });
+    } else {
+      data = await getHianimeSource({ id, server, type });
+    }
+
     res.status(200).json(data);
   } catch (error) {
     res.status(400).json({ status: "error", message: (error as Error).message });
