@@ -8,7 +8,12 @@
     "type": "git",
     "url": "https://github.com/Firkhie/anistream-api.git"
   },
-  "keywords":  ["anime", "api", "streaming", "episodes"],
+  "keywords": [
+    "anime",
+    "api",
+    "streaming",
+    "episodes"
+  ],
   "main": "src/index.ts",
   "scripts": {
     "start": "node --env-file=.env dist/src/index.js",
@@ -23,6 +28,7 @@
     "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.3.1",
     "helmet": "^8.1.0",
     "morgan": "^1.10.0",
     "string-similarity": "^4.0.4",
