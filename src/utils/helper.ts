@@ -1,27 +1,32 @@
-import { compareTwoStrings } from 'string-similarity';
-import { MediaSeason } from "../providers/anilist/anilist.enums";
-import { MediaTitle } from "../providers/anilist/anilist.types";
-import { HianimeListResult } from '../providers/hianime/hianime.types';
-import { getHianimeServersByEpisodeId } from '../providers/hianime/hianime.service';
+import { compareTwoStrings } from "string-similarity";
+
+import type { MediaTitle } from "../providers/anilist/anilist.types.js";
+import type { HianimeListResult } from "../providers/hianime/hianime.types.js";
+
+import { MediaSeason } from "../providers/anilist/anilist.enums.js";
+import { getHianimeServersByEpisodeId } from "../providers/hianime/hianime.service.js";
 
 export function getSeason(): MediaSeason {
   const month = new Date().getMonth() + 1;
 
   if (month >= 1 && month <= 3) {
     return MediaSeason.WINTER;
-  } else if (month >= 4 && month <= 6) {
+  }
+  else if (month >= 4 && month <= 6) {
     return MediaSeason.SPRING;
-  } else if (month >= 7 && month <= 9) {
+  }
+  else if (month >= 7 && month <= 9) {
     return MediaSeason.SUMMER;
-  } else {
+  }
+  else {
     return MediaSeason.FALL;
   }
 }
 
 export function cleanQueries({ queries }: { queries: any }) {
   return Object.fromEntries(
-    Object.entries(queries).filter(([_, v]) => v != null && v !== "" && !Number.isNaN(v))
-  )
+    Object.entries(queries).filter(([_, v]) => v != null && v !== "" && !Number.isNaN(v)),
+  );
 }
 
 export function findSimilarTitles({
@@ -40,10 +45,12 @@ export function findSimilarTitles({
 
   titles.forEach((item) => {
     let targetTitle = "";
-    if (type === "english") targetTitle = item.title.english || "";
+    if (type === "english")
+      targetTitle = item.title.english || "";
     else targetTitle = item.title.romaji || "";
 
-    if (!targetTitle) return;
+    if (!targetTitle)
+      return;
 
     const cleanTarget = cleanTitle(targetTitle);
     const similarity = calculateSimilarity(cleanInput, cleanTarget);
@@ -72,9 +79,10 @@ function calculateSimilarity(input: string, target: string): number {
 
   // Calculate base similarity
   const baseSimilarity = compareTwoStrings(baseInput, baseTarget);
-  
+
   // If base titles don't match well, return low score
-  if (baseSimilarity < 0.7) return baseSimilarity;
+  if (baseSimilarity < 0.7)
+    return baseSimilarity;
 
   // Check if numbers match
   const inputNum = input.match(/\d+$/)?.[0];
@@ -104,19 +112,19 @@ function calculateSimilarity(input: string, target: string): number {
   return Math.min(0.9, baseSimilarity + 0.1);
 }
 
-export async function checkRequestedServers({ id, server, type }: { id: string, server: string, type: "sub" | "dub" }) {
+export async function checkRequestedServers({ id, server, type }: { id: string; server: string; type: "sub" | "dub" }) {
   const servers = await getHianimeServersByEpisodeId({ id });
 
-  let requestedServers = servers.filter((n) =>
-    n.serverName.toLowerCase() === server.toLowerCase() && 
-    n.type === type
-  )
-  
+  let requestedServers = servers.filter(n =>
+    n.serverName.toLowerCase() === server.toLowerCase()
+    && n.type === type,
+  );
+
   if (requestedServers.length === 0) {
-    requestedServers = servers.filter((n) => 
-      n.serverName.toLowerCase() === server.toLowerCase() && 
-      n.type === "raw"
-    )
+    requestedServers = servers.filter(n =>
+      n.serverName.toLowerCase() === server.toLowerCase()
+      && n.type === "raw",
+    );
   }
   if (requestedServers.length === 0) {
     return false;

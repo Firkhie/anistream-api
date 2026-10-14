@@ -1,23 +1,25 @@
 import * as cheerio from "cheerio";
-import { HianimeEpisodesResult, HianimeListResult, HianimeServersResult } from "./hianime.types";
+
+import type { HianimeEpisodesResult, HianimeListResult, HianimeServersResult } from "./hianime.types.js";
 
 export async function extractHianimeBySearch({ data }: { data: string }) {
-  if (!data) return []
+  if (!data)
+    return [];
 
   const $ = cheerio.load(data);
-  
+
   const elements = "#main-content .film_list-wrap .flw-item";
 
   const result: HianimeListResult[] = [];
   $(elements).each((_, el) => {
-    const id =
-      $(el)
+    const id
+      = $(el)
         .find(".film-detail .film-name .dynamic-name")
         ?.attr("href")
         ?.slice(1)
         .split("?ref=search")[0] || null;
     result.push({
-      id: id,
+      id,
       format: $(el)
         .find(".film-detail .fd-infor .fdi-item")
         .first()
@@ -26,27 +28,28 @@ export async function extractHianimeBySearch({ data }: { data: string }) {
       title: {
         romaji:
           $(el)
-          .find(".film-detail .film-name .dynamic-name")
-          ?.attr("data-jname")
-          ?.trim() || null,
+            .find(".film-detail .film-name .dynamic-name")
+            ?.attr("data-jname")
+            ?.trim() || null,
         english:
           $(el)
-          .find(".film-detail .film-name .dynamic-name")
-          ?.text()
-          ?.trim() || null
-      }
+            .find(".film-detail .film-name .dynamic-name")
+            ?.text()
+            ?.trim() || null,
+      },
     });
   });
 
-  return result
+  return result;
 }
 
-export async function extractHianimeEpisodesById({ data }: { data: { status: boolean, html: string } }) {
-  if (!data.html) return []
-  
+export async function extractHianimeEpisodesById({ data }: { data: { status: boolean; html: string } }) {
+  if (!data.html)
+    return [];
+
   const $ = cheerio.load(String(data.html));
 
-  const result: HianimeEpisodesResult  = {
+  const result: HianimeEpisodesResult = {
     totalEpisodes: 0,
     episodes: [],
   };
@@ -64,32 +67,34 @@ export async function extractHianimeEpisodesById({ data }: { data: { status: boo
   return result;
 }
 
-export async function extractHianimeServersByEpisodeId({ data }: { data: { status: boolean, html: string } }) {
-  if (!data.html) return []
+export async function extractHianimeServersByEpisodeId({ data }: { data: { status: boolean; html: string } }) {
+  if (!data.html)
+    return [];
 
   const $ = cheerio.load(data.html);
   const result: any = [];
-    $(".server-item").each((index, element) => {
-      const data_id = $(element).attr("data-id");
-      const server_id = $(element).attr("data-server-id");
-      const type = $(element).attr("data-type");
+  $(".server-item").each((index, element) => {
+    const data_id = $(element).attr("data-id");
+    const server_id = $(element).attr("data-server-id");
+    const type = $(element).attr("data-type");
 
-      const serverName = $(element).find("a").text().trim();
-      result.push({
-        type,
-        data_id,
-        server_id,
-        serverName,
-      });
+    const serverName = $(element).find("a").text().trim();
+    result.push({
+      type,
+      data_id,
+      server_id,
+      serverName,
     });
-    return result as HianimeServersResult[];
+  });
+  return result as HianimeServersResult[];
 }
 
-export async function extractHianimeDataId({ fallbackServer, iframeUrl, html }: { fallbackServer: string, iframeUrl: string, html: string } ) {
+export async function extractHianimeDataId({ fallbackServer, iframeUrl, html }: { fallbackServer: string; iframeUrl: string; html: string }) {
   const $ = cheerio.load(html);
   const dataId = $("#megaplay-player").attr("data-id");
 
-  if (!dataId) throw new Error("Unable to extract data-id from iframe HTML");
+  if (!dataId)
+    throw new Error("Unable to extract data-id from iframe HTML");
 
   return { dataId, fallbackServer, iframeUrl };
 }

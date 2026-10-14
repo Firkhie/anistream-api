@@ -3,6 +3,10 @@ import { z } from "zod/v4";
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().default(3000),
+  ALLOWED_ORIGINS: z.string().optional(),
+  API_SECRET_KEY: z.string().optional(),
+  UPSTASH_REDIS_REST_URL: z.string().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 });
 
 try {

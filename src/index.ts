@@ -1,25 +1,21 @@
 import app from "./app.js";
 import { env } from "./env.js";
-import { Redis } from '@upstash/redis'
-
-export const redis = 
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    })
-  : null;
+import { redis } from "./redis.js";
 
 const port = env.PORT;
 
-if (process.env.NODE_ENV === "development") {
+// Serverless platforms (Vercel) and the test runner manage the HTTP lifecycle
+// themselves; everywhere else (dev AND production) we must bind a port.
+const shouldListen = env.NODE_ENV !== "test" && !process.env.VERCEL;
+
+if (shouldListen) {
   const server = app.listen(port, () => {
     console.log(`Listening: http://localhost:${port}`);
     if (!redis) {
       console.log(`Redis not found. Cache disabled.`);
     }
   });
-  
+
   server.on("error", (err) => {
     if ("code" in err && err.code === "EADDRINUSE") {
       console.error(`Port ${env.PORT} is already in use. Please choose another port or stop the process using it.`);

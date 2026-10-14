@@ -1,10 +1,11 @@
-import { fetchAnizipEpisodesById } from "./anizip.fetch";
-import { AnizipEpisode, AnizipEpisodesResponse } from "./anizip.types";
+import type { AnizipEpisode, AnizipEpisodesResponse } from "./anizip.types.js";
+
+import { fetchAnizipEpisodesById } from "./anizip.fetch.js";
 
 export async function getAnizipEpisodesById({ id }: { id: string }) {
   const data = (await fetchAnizipEpisodesById({ id })).episodes;
-  
-  const episodes: AnizipEpisodesResponse = {}
+
+  const episodes: AnizipEpisodesResponse = {};
 
   for (const eps in data) {
     const raw = data[eps];
@@ -20,6 +21,6 @@ export async function getAnizipEpisodesById({ id }: { id: string }) {
 
     episodes[eps] = episode;
   }
-  
+
   return episodes;
 }

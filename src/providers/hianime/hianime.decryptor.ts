@@ -54,25 +54,28 @@ export async function decryptHianimeData({
 
       // Ambil data-id player
       const dataId = $("#megaplay-player").attr("data-id");
-      if (!dataId) throw new Error("Missing data-id");
+      if (!dataId)
+        throw new Error("Missing data-id");
 
       // Ambil sources JSON
       const sourceResponse = await fetch(
         `https://${fallbackServer}/stream/getSources?id=${dataId}`,
         {
           headers: { "X-Requested-With": "XMLHttpRequest" },
-        }
+        },
       );
       decryptedSources = await sourceResponse.json();
-    } else {
+    }
+    else {
       // Ambil sources dari v1
       const response = await fetch(
-        `${V1_BASE_URL}/ajax/v2/episode/sources?id=${id}`
+        `${V1_BASE_URL}/ajax/v2/episode/sources?id=${id}`,
       );
       const sourcesData = await response.json();
 
       const ajaxLink = sourcesData?.link;
-      if (!ajaxLink) throw new Error("Missing link in sourcesData");
+      if (!ajaxLink)
+        throw new Error("Missing link in sourcesData");
 
       const sourceIdMatch = /\/([^/?]+)\?/.exec(ajaxLink);
       const sourceId = sourceIdMatch?.[1];
@@ -88,12 +91,13 @@ export async function decryptHianimeData({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ embedUrl }),
-        }
+        },
       );
       decryptedSources = await postResponse.json();
     }
 
-    if (!decryptedSources) throw new Error("Failed to decrypt sources");
+    if (!decryptedSources)
+      throw new Error("Failed to decrypt sources");
 
     return {
       id,
@@ -110,10 +114,11 @@ export async function decryptHianimeData({
       iframe: iframeURL,
       server,
     };
-  } catch (error: any) {
+  }
+  catch (error: any) {
     console.error(
       `Error decryptHianimeData(id=${id}, epId=${epId}, server=${server}):`,
-      error?.message || error
+      error?.message || error,
     );
     return null;
   }

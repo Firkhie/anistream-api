@@ -1,15 +1,15 @@
-import { 
-  CharacterRole, 
-  GenreCollection, 
-  MediaFormat, 
-  MediaRelation, 
-  MediaSeason, 
-  MediaSort, 
-  MediaStatus, 
-  MediaType, 
-  StaffLanguage, 
-  StaffLanguageV2 
-} from "./anilist.enums";
+import type {
+  CharacterRole,
+  GenreCollection,
+  MediaFormat,
+  MediaRelation,
+  MediaSeason,
+  MediaSort,
+  MediaStatus,
+  MediaType,
+  StaffLanguage,
+  StaffLanguageV2,
+} from "./anilist.enums.js";
 
 export type AnimeDetail = AnimeBasic & {
   startDate: FuzzyDate | null;
@@ -48,22 +48,22 @@ export type AnimeBasic = {
 };
 
 export type MediaVariables = {
-  page: number,
-  perPage: number,
-  season?: MediaSeason,
-  seasonYear?: number,
-  type?: MediaType,
-  format?: MediaFormat,
-  status?: MediaStatus,
-  isAdult?: boolean,
-  search?: string,
-  formatIn?: MediaFormat[],
-  statusIn?: MediaStatus[],
-  genreIn?: GenreCollection[],
-  averageScoreGreater?: number,
-  averageScoreLesser?: number,
-  sort?: MediaSort[],
-}
+  page: number;
+  perPage: number;
+  season?: MediaSeason;
+  seasonYear?: number;
+  type?: MediaType;
+  format?: MediaFormat;
+  status?: MediaStatus;
+  isAdult?: boolean;
+  search?: string;
+  formatIn?: MediaFormat[];
+  statusIn?: MediaStatus[];
+  genreIn?: GenreCollection[];
+  averageScoreGreater?: number;
+  averageScoreLesser?: number;
+  sort?: MediaSort[];
+};
 
 export type MediaTitle = {
   romaji: string | null;

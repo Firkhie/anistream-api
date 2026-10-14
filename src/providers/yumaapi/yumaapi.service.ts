@@ -1,5 +1,6 @@
-import { fetchYumaapiById, fetchYumaapiSourcesByEpsId } from "./yumaapi.fetch";
-import { YumaapiEpisode, YumaapiEpisodesResult } from "./yumaapi.types";
+import type { YumaapiEpisode, YumaapiEpisodesResult } from "./yumaapi.types.js";
+
+import { fetchYumaapiById, fetchYumaapiSourcesByEpsId } from "./yumaapi.fetch.js";
 
 export async function getYumaapiEpisodesById({ id }: { id: string }) {
   const raw = await fetchYumaapiById({ id });
@@ -12,17 +13,17 @@ export async function getYumaapiEpisodesById({ id }: { id: string }) {
 
   return {
     episodes: data,
-    totalEpisodes: data.length
+    totalEpisodes: data.length,
   } as YumaapiEpisodesResult;
 }
 
-export async function getYumaapiSource({ id, type = "sub" }: { id: string, type?: "sub" | "dub" }) {
+export async function getYumaapiSource({ id, type = "sub" }: { id: string; type?: "sub" | "dub" }) {
   try {
     const data = await fetchYumaapiSourcesByEpsId({ epsId: id });
 
-    const source =
-      data?.sources?.find((s: any) => s.isM3U8) ||
-      data?.sources?.[0];
+    const source
+      = data?.sources?.find((s: any) => s.isM3U8)
+        || data?.sources?.[0];
 
     const tracks = [
       ...(data?.subtitles || []).map((s: any, i: number) => ({
@@ -55,10 +56,11 @@ export async function getYumaapiSource({ id, type = "sub" }: { id: string, type?
       streamingLink,
       servers: [],
     };
-  } catch (error) {
+  }
+  catch (error) {
     console.error(
       `getYumaapiSource error for episode ${id}:`,
-      (error as Error).message
+      (error as Error).message,
     );
     return null;
   }
