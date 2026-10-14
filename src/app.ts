@@ -23,6 +23,9 @@ const localLimiter = rateLimit({
   standardHeaders: "draft-8",
   legacyHeaders: false,
   ipv6Subnet: 56,
+  validate: {
+    forwardedHeader: false,
+  },
 });
 
 // Distributed rate limiter (uses Upstash Redis across serverless instances if configured)
