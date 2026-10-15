@@ -27,11 +27,19 @@ export class AnilistProvider implements IStreamingProvider {
   async getEpisodes(id: string): Promise<ProviderEpisodesResult> {
     try {
       const data = await getAnilistStreamingEpisodesById({ id });
-      const totalCount
-        = data?.episodes
-          || (data?.nextAiringEpisode ? data.nextAiringEpisode.episode - 1 : null)
-          || data?.streamingEpisodes?.length
-          || 0;
+      if (data?.status === "NOT_YET_RELEASED") {
+        return { totalEpisodes: 0, episodes: [] };
+      }
+
+      let totalCount = 0;
+      if (data?.nextAiringEpisode?.episode) {
+        // Ongoing anime: only include episodes released so far (next episode to air - 1)
+        totalCount = Math.max(0, data.nextAiringEpisode.episode - 1);
+      } else if (data?.episodes) {
+        totalCount = data.episodes;
+      } else if (data?.streamingEpisodes?.length) {
+        totalCount = data.streamingEpisodes.length;
+      }
 
       const episodes = Array.from({ length: totalCount }, (_, i) => {
         const episode_no = i + 1;

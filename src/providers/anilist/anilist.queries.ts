@@ -6,6 +6,6 @@ export const anilistSearchQuery = `query Page($page: Int, $perPage: Int, $season
 
 export const anilistAiringQuery = `query Query($page: Int, $perPage: Int, $airingAtGreater: Int, $airingAtLesser: Int) { Page(page: $page, perPage: $perPage) { airingSchedules(airingAt_greater: $airingAtGreater, airingAt_lesser: $airingAtLesser, sort: [TIME]) { id airingAt timeUntilAiring episode media { id idMal title { romaji english native userPreferred } format status description season seasonYear episodes coverImage { extraLarge large medium color } bannerImage genres averageScore nextAiringEpisode { airingAt timeUntilAiring episode } } } pageInfo { currentPage hasNextPage } } }`;
 
-export const anilistTitleQuery = `query Query($id: Int) { Media(id: $id) { id title { romaji english native userPreferred } status format } }`;
+export const anilistTitleQuery = `query Query($id: Int) { Media(id: $id) { id title { romaji english native userPreferred } status format episodes nextAiringEpisode { episode } } }`;
 
-export const anilistStreamingEpisodesQuery = `query Query($id: Int) { Media(id: $id) { id episodes nextAiringEpisode { episode } streamingEpisodes { title thumbnail url site } } }`;
+export const anilistStreamingEpisodesQuery = `query Query($id: Int) { Media(id: $id) { id status episodes nextAiringEpisode { episode } streamingEpisodes { title thumbnail url site } } }`;

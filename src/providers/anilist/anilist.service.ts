@@ -21,7 +21,7 @@ const langFormat: StaffLanguageV2[] = [
   StaffLanguageV2.INDONESIAN,
 ];
 
-const CACHE_VERSION = "v3";
+const CACHE_VERSION = "v4";
 
 type PresetName = "popular" | "trending" | "newest" | "upcoming";
 const animePreset: Record<PresetName, Partial<MediaVariables>> = {
@@ -542,6 +542,7 @@ export async function getAnilistStreamingEpisodesById({ id }: { id: string }) {
     const data = (await fetchAnilist({ query: anilistStreamingEpisodesQuery, variables })).data.Media;
     return data as {
       id: number;
+      status: string | null;
       episodes: number | null;
       nextAiringEpisode?: { episode: number } | null;
       streamingEpisodes?: {

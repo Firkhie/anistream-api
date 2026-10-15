@@ -6,6 +6,8 @@ import type {
 } from "../src/providers/provider.interface.js";
 
 import { ProviderManager } from "../src/providers/provider.manager.js";
+import { AnilistProvider } from "../src/providers/anilist/anilist.provider.js";
+import * as anilistService from "../src/providers/anilist/anilist.service.js";
 import { BadRequestError } from "../src/utils/errors.js";
 
 describe("ProviderManager", () => {
@@ -137,5 +139,63 @@ describe("ProviderManager", () => {
 
     warnSpy.mockRestore();
     logSpy.mockRestore();
+  });
+});
+
+describe("AnilistProvider", () => {
+  it("returns only released episodes for ongoing anime with nextAiringEpisode", async () => {
+    const provider = new AnilistProvider();
+    const serviceSpy = vi
+      .spyOn(anilistService, "getAnilistStreamingEpisodesById")
+      .mockResolvedValueOnce({
+        status: "RELEASING",
+        episodes: 12,
+        nextAiringEpisode: { episode: 5 },
+        streamingEpisodes: [],
+      });
+
+    const result = await provider.getEpisodes("12345");
+    expect(result.totalEpisodes).toBe(4);
+    expect(result.episodes).toHaveLength(4);
+    expect(result.episodes[0].episode_no).toBe(1);
+    expect(result.episodes[3].episode_no).toBe(4);
+
+    serviceSpy.mockRestore();
+  });
+
+  it("returns 0 episodes when status is NOT_YET_RELEASED", async () => {
+    const provider = new AnilistProvider();
+    const serviceSpy = vi
+      .spyOn(anilistService, "getAnilistStreamingEpisodesById")
+      .mockResolvedValueOnce({
+        status: "NOT_YET_RELEASED",
+        episodes: 12,
+        nextAiringEpisode: { episode: 1 },
+        streamingEpisodes: [],
+      });
+
+    const result = await provider.getEpisodes("99999");
+    expect(result.totalEpisodes).toBe(0);
+    expect(result.episodes).toHaveLength(0);
+
+    serviceSpy.mockRestore();
+  });
+
+  it("returns all episodes for finished anime without nextAiringEpisode", async () => {
+    const provider = new AnilistProvider();
+    const serviceSpy = vi
+      .spyOn(anilistService, "getAnilistStreamingEpisodesById")
+      .mockResolvedValueOnce({
+        status: "FINISHED",
+        episodes: 24,
+        nextAiringEpisode: null,
+        streamingEpisodes: [],
+      });
+
+    const result = await provider.getEpisodes("54321");
+    expect(result.totalEpisodes).toBe(24);
+    expect(result.episodes).toHaveLength(24);
+
+    serviceSpy.mockRestore();
   });
 });
