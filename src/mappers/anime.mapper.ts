@@ -53,7 +53,8 @@ export async function episodeMapper({
   if (anilistData?.nextAiringEpisode?.episode) {
     // For ongoing anime: only episodes before nextAiringEpisode have aired
     maxReleasedEpisode = Math.max(0, anilistData.nextAiringEpisode.episode - 1);
-  } else if (anilistData?.status === "FINISHED" && anilistData?.episodes) {
+  }
+  else if (anilistData?.status === "FINISHED" && anilistData?.episodes) {
     maxReleasedEpisode = anilistData.episodes;
   }
 

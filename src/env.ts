@@ -7,6 +7,7 @@ const envSchema = z.object({
   API_SECRET_KEY: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  VERCEL: z.string().optional(),
 });
 
 try {

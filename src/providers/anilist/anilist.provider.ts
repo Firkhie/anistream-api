@@ -35,9 +35,11 @@ export class AnilistProvider implements IStreamingProvider {
       if (data?.nextAiringEpisode?.episode) {
         // Ongoing anime: only include episodes released so far (next episode to air - 1)
         totalCount = Math.max(0, data.nextAiringEpisode.episode - 1);
-      } else if (data?.episodes) {
+      }
+      else if (data?.episodes) {
         totalCount = data.episodes;
-      } else if (data?.streamingEpisodes?.length) {
+      }
+      else if (data?.streamingEpisodes?.length) {
         totalCount = data.streamingEpisodes.length;
       }
 

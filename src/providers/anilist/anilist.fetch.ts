@@ -10,7 +10,7 @@ const HEADERS = {
 };
 
 async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export async function fetchAnilist({ query, variables }: any) {
@@ -82,7 +82,8 @@ export async function fetchAnilistIds() {
     return response.text();
   }
   catch (error) {
-    if (error instanceof UpstreamError) throw error;
+    if (error instanceof UpstreamError)
+      throw error;
     throw new UpstreamError((error as Error).message);
   }
 }

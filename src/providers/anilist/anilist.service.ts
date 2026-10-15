@@ -2,7 +2,6 @@ import type { AnimeBasic, AnimeDetail, Character, MediaVariables, SearchResponse
 
 import { getOrSetCache } from "../../redis.js";
 import { BadRequestError } from "../../utils/errors.js";
-import { getSeason } from "../../utils/helper.js";
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus, MediaType, StaffLanguageV2 } from "./anilist.enums.js";
 import { fetchAnilist, fetchAnilistIds } from "./anilist.fetch.js";
 import { anilistAiringQuery, anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery, anilistStreamingEpisodesQuery, anilistTitleQuery } from "./anilist.queries.js";
@@ -159,52 +158,52 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
     const mediaList = Array.isArray(data.media) ? data.media : [];
 
     const animeBasics: AnimeBasic[] = mediaList.map((item: any) => {
-    const animeBasic: AnimeBasic = {
-      id: item.id,
-      idMal: item.idMal ?? null,
-      title: {
-        romaji: item.title?.romaji ?? null,
-        english: item.title?.english ?? null,
-        native: item.title?.native ?? null,
-        userPreferred: item.title?.userPreferred ?? null,
-      },
-      format: item.format ?? null,
-      status: item.status ?? null,
-      description: item.description ?? null,
-      season: item.season ?? null,
-      year: item.seasonYear ?? null,
-      totalEpisodes: item.episodes ?? null,
-      currentEpisode: item.nextAiringEpisode
-        ? (item.nextAiringEpisode.episode ?? 1) - 1
-        : item.episodes ?? null,
-      color: item.coverImage?.color ?? null,
-      coverImage:
+      const animeBasic: AnimeBasic = {
+        id: item.id,
+        idMal: item.idMal ?? null,
+        title: {
+          romaji: item.title?.romaji ?? null,
+          english: item.title?.english ?? null,
+          native: item.title?.native ?? null,
+          userPreferred: item.title?.userPreferred ?? null,
+        },
+        format: item.format ?? null,
+        status: item.status ?? null,
+        description: item.description ?? null,
+        season: item.season ?? null,
+        year: item.seasonYear ?? null,
+        totalEpisodes: item.episodes ?? null,
+        currentEpisode: item.nextAiringEpisode
+          ? (item.nextAiringEpisode.episode ?? 1) - 1
+          : item.episodes ?? null,
+        color: item.coverImage?.color ?? null,
+        coverImage:
         item.coverImage?.extraLarge
         ?? item.coverImage?.large
         ?? item.coverImage?.medium
         ?? null,
-      bannerImage: item.bannerImage ?? null,
-      genres: item.genres ?? [],
-      rating: item.averageScore ?? null,
-      nextAiringEpisode: item.nextAiringEpisode
-        ? {
-            airingAt: item.nextAiringEpisode.airingAt ?? null,
-            episode: item.nextAiringEpisode.episode ?? null,
-            timeUntilAiring: item.nextAiringEpisode.timeUntilAiring ?? null,
-          }
-        : null,
+        bannerImage: item.bannerImage ?? null,
+        genres: item.genres ?? [],
+        rating: item.averageScore ?? null,
+        nextAiringEpisode: item.nextAiringEpisode
+          ? {
+              airingAt: item.nextAiringEpisode.airingAt ?? null,
+              episode: item.nextAiringEpisode.episode ?? null,
+              timeUntilAiring: item.nextAiringEpisode.timeUntilAiring ?? null,
+            }
+          : null,
+      };
+
+      return animeBasic;
+    }) ?? [];
+
+    const result: SearchResponse = {
+      currentPage: data.pageInfo?.currentPage ?? null,
+      hasNextPage: data.pageInfo?.hasNextPage ?? null,
+      results: animeBasics,
     };
 
-    return animeBasic;
-  }) ?? [];
-
-  const result: SearchResponse = {
-    currentPage: data.pageInfo?.currentPage ?? null,
-    hasNextPage: data.pageInfo?.hasNextPage ?? null,
-    results: animeBasics,
-  };
-
-  return result;
+    return result;
   }, ttlSeconds);
 }
 

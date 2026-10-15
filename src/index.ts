@@ -6,7 +6,7 @@ const port = env.PORT;
 
 // Serverless platforms (Vercel) and the test runner manage the HTTP lifecycle
 // themselves; everywhere else (dev AND production) we must bind a port.
-const shouldListen = env.NODE_ENV !== "test" && !process.env.VERCEL;
+const shouldListen = env.NODE_ENV !== "test" && !env.VERCEL;
 
 if (shouldListen) {
   const server = app.listen(port, () => {

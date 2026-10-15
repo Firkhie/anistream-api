@@ -5,9 +5,9 @@ import type {
   StreamSourceResult,
 } from "../src/providers/provider.interface.js";
 
-import { ProviderManager } from "../src/providers/provider.manager.js";
 import { AnilistProvider } from "../src/providers/anilist/anilist.provider.js";
 import * as anilistService from "../src/providers/anilist/anilist.service.js";
+import { ProviderManager } from "../src/providers/provider.manager.js";
 import { BadRequestError } from "../src/utils/errors.js";
 
 describe("ProviderManager", () => {
@@ -148,6 +148,7 @@ describe("AnilistProvider", () => {
     const serviceSpy = vi
       .spyOn(anilistService, "getAnilistStreamingEpisodesById")
       .mockResolvedValueOnce({
+        id: 12345,
         status: "RELEASING",
         episodes: 12,
         nextAiringEpisode: { episode: 5 },
@@ -168,6 +169,7 @@ describe("AnilistProvider", () => {
     const serviceSpy = vi
       .spyOn(anilistService, "getAnilistStreamingEpisodesById")
       .mockResolvedValueOnce({
+        id: 99999,
         status: "NOT_YET_RELEASED",
         episodes: 12,
         nextAiringEpisode: { episode: 1 },
@@ -186,6 +188,7 @@ describe("AnilistProvider", () => {
     const serviceSpy = vi
       .spyOn(anilistService, "getAnilistStreamingEpisodesById")
       .mockResolvedValueOnce({
+        id: 54321,
         status: "FINISHED",
         episodes: 24,
         nextAiringEpisode: null,

@@ -97,7 +97,7 @@ export async function getHianimeSource({ id, server, type }: { id: string; serve
     }
 
     // Stream Link
-    const epsId = id.split("ep=")[1];
+
     const streamingLink = await decryptHianimeData({
       epId: id,
       id: requestedServer[0].data_id,
