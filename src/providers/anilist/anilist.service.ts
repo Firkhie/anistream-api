@@ -7,35 +7,6 @@ import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus, Medi
 import { fetchAnilist, fetchAnilistIds } from "./anilist.fetch.js";
 import { anilistAiringQuery, anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery, anilistStreamingEpisodesQuery, anilistTitleQuery } from "./anilist.queries.js";
 
-type PresetName = "popular" | "trending" | "newest" | "upcoming";
-const animePreset: Record<PresetName, Partial<MediaVariables>> = {
-  popular: {
-    type: MediaType.ANIME,
-    sort: [MediaSort.POPULARITY_DESC],
-    formatIn: [MediaFormat.TV],
-    seasonYear: new Date().getFullYear(),
-    season: getSeason(),
-  },
-  trending: {
-    type: MediaType.ANIME,
-    sort: [MediaSort.TRENDING_DESC],
-    formatIn: [MediaFormat.TV],
-    seasonYear: new Date().getFullYear(),
-    season: getSeason(),
-  },
-  newest: {
-    type: MediaType.ANIME,
-    sort: [MediaSort.UPDATED_AT_DESC],
-    formatIn: [MediaFormat.TV],
-    status: MediaStatus.RELEASING,
-  },
-  upcoming: {
-    type: MediaType.ANIME,
-    sort: [MediaSort.TRENDING_DESC],
-    formatIn: [MediaFormat.TV],
-    status: MediaStatus.NOT_YET_RELEASED,
-  },
-};
 const animeFormat: MediaFormat[] = [
   MediaFormat.TV,
   MediaFormat.TV_SHORT,
@@ -50,10 +21,39 @@ const langFormat: StaffLanguageV2[] = [
   StaffLanguageV2.INDONESIAN,
 ];
 
+const CACHE_VERSION = "v3";
+
+type PresetName = "popular" | "trending" | "newest" | "upcoming";
+const animePreset: Record<PresetName, Partial<MediaVariables>> = {
+  popular: {
+    type: MediaType.ANIME,
+    sort: [MediaSort.POPULARITY_DESC],
+    formatIn: animeFormat,
+  },
+  trending: {
+    type: MediaType.ANIME,
+    sort: [MediaSort.TRENDING_DESC],
+    formatIn: animeFormat,
+    status: MediaStatus.RELEASING,
+  },
+  newest: {
+    type: MediaType.ANIME,
+    sort: [MediaSort.START_DATE_DESC],
+    formatIn: animeFormat,
+    status: MediaStatus.RELEASING,
+  },
+  upcoming: {
+    type: MediaType.ANIME,
+    sort: [MediaSort.POPULARITY_DESC],
+    formatIn: animeFormat,
+    status: MediaStatus.NOT_YET_RELEASED,
+  },
+};
+
 export async function getAnilistByPreset({ preset, page, perPage }: { preset: PresetName; page: number; perPage: number }) {
   const variables = { ...animePreset[preset], page, perPage };
-  const cacheKey = `anilist:${preset}:p${page}:pp${perPage}`;
-  const ttlSeconds = preset === "newest" ? 60 * 60 * 3 : 60 * 60 * 24 * 7;
+  const cacheKey = `anilist:${CACHE_VERSION}:${preset}:p${page}:pp${perPage}`;
+  const ttlSeconds = (preset === "newest" || preset === "trending") ? 60 * 60 * 2 : 60 * 60 * 12;
 
   return getOrSetCache(cacheKey, async () => {
     const data = (await fetchAnilist({ query: anilistSearchQuery, variables })).data.Page;
@@ -136,11 +136,16 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
       throw new BadRequestError(`Invalid sort: ${invalid.join(", ")}`);
     }
   }
-  const cacheKey = `anilist:search:${JSON.stringify(variables)}`;
+  const cacheKey = `anilist:${CACHE_VERSION}:search:${JSON.stringify(variables)}`;
   const ttlSeconds = 60 * 30; // 30 minutes cache for search results
 
   return getOrSetCache(cacheKey, async () => {
-    const raw = await fetchAnilist({ query: anilistSearchQuery, variables: { ...variables, type: "ANIME" } });
+    const searchVariables: MediaVariables = {
+      ...variables,
+      type: MediaType.ANIME,
+      formatIn: variables.format ? undefined : (variables.formatIn?.length ? variables.formatIn : animeFormat),
+    };
+    const raw = await fetchAnilist({ query: anilistSearchQuery, variables: searchVariables });
     const data = raw?.data?.Page;
 
     if (!data) {
@@ -205,12 +210,13 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
 
 export async function getAnilistAiringSchedule({ days, page, perPage }: { days: number; page: number; perPage: number }) {
   const now = Math.floor(Date.now() / 1000);
-  const until = now + days * 24 * 60 * 60;
-  const bucket = Math.floor(now / 10800);
-  const cacheKey = `anilist:airing:d${days}:p${page}:pp${perPage}:b${bucket}`;
+  const startOfDay = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+  const until = startOfDay + days * 24 * 60 * 60;
+  const bucket = Math.floor(now / 3600);
+  const cacheKey = `anilist:${CACHE_VERSION}:airing:d${days}:p${page}:pp${perPage}:b${bucket}`;
 
   return getOrSetCache(cacheKey, async () => {
-    const variables = { airingAtLesser: until, airingAtGreater: now, page, perPage };
+    const variables = { airingAtLesser: until, airingAtGreater: startOfDay, page, perPage };
     const data = (await fetchAnilist({ query: anilistAiringQuery, variables })).data.Page;
 
     const animeBasics: AnimeBasic[] = data.airingSchedules.map((item: any) => {
@@ -228,9 +234,9 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
         },
         format: item.media.format ?? null,
         status: item.media.status ?? null,
-        description: item.description ?? null,
-        season: item.season ?? null,
-        year: item.seasonYear ?? null,
+        description: item.media.description ?? null,
+        season: item.media.season ?? null,
+        year: item.media.seasonYear ?? null,
         totalEpisodes: item.media.episodes ?? null,
         currentEpisode: item.media.nextAiringEpisode
           ? (item.media.nextAiringEpisode.episode ?? 1) - 1
@@ -242,15 +248,13 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
         ?? item.media.coverImage?.medium
         ?? null,
         bannerImage: item.media.bannerImage ?? null,
-        genres: item.genres ?? [],
+        genres: item.media.genres ?? [],
         rating: item.media.averageScore ?? null,
-        nextAiringEpisode: item.media.nextAiringEpisode
-          ? {
-              airingAt: item.media.nextAiringEpisode.airingAt ?? null,
-              episode: item.media.nextAiringEpisode.episode ?? null,
-              timeUntilAiring: item.media.nextAiringEpisode.timeUntilAiring ?? null,
-            }
-          : null,
+        nextAiringEpisode: {
+          airingAt: item.airingAt ?? item.media.nextAiringEpisode?.airingAt ?? null,
+          episode: item.episode ?? item.media.nextAiringEpisode?.episode ?? null,
+          timeUntilAiring: item.timeUntilAiring ?? item.media.nextAiringEpisode?.timeUntilAiring ?? null,
+        },
       };
 
       return animeBasic;
@@ -258,12 +262,12 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
       .filter(Boolean) ?? [];
 
     const result: SearchResponse = {
-      currentPage: data.pageInfo?.currentPage ?? null,
-      hasNextPage: data.pageInfo?.hasNextPage ?? null,
+      currentPage: data.pageInfo?.currentPage ?? page,
+      hasNextPage: data.pageInfo?.hasNextPage ?? false,
       results: animeBasics,
     };
     return result;
-  }, 10800);
+  }, 3600);
 }
 
 export async function getAnilistDetailByRandom() {
@@ -277,7 +281,7 @@ export async function getAnilistDetailByRandom() {
 }
 
 export async function getAnilistDetailById({ id }: { id: string }) {
-  const cacheKey = `anilist:detail:${id}`;
+  const cacheKey = `anilist:${CACHE_VERSION}:detail:${id}`;
 
   return getOrSetCache(cacheKey, async () => {
     const variables = { id };
@@ -472,7 +476,7 @@ export async function getAnilistCharactersById({
 }) {
   const p = page || 1;
   const pp = perPage || 50;
-  const cacheKey = `anilist:characters:${id}:p${p}:pp${pp}`;
+  const cacheKey = `anilist:${CACHE_VERSION}:characters:${id}:p${p}:pp${pp}`;
 
   return getOrSetCache(cacheKey, async () => {
     const variables = { id, page: p, perPage: pp };
@@ -515,8 +519,8 @@ export async function getAnilistCharactersById({
     }) ?? [];
 
     const result: SearchResponse = {
-      currentPage: data.pageInfo?.currentPage ?? null,
-      hasNextPage: data.pageInfo?.hasNextPage ?? null,
+      currentPage: data.pageInfo?.currentPage ?? p,
+      hasNextPage: data.pageInfo?.hasNextPage ?? false,
       results: characters,
     };
     return result;
@@ -531,7 +535,7 @@ export async function getAnilistTitleById({ id }: { id: string }) {
 }
 
 export async function getAnilistStreamingEpisodesById({ id }: { id: string }) {
-  const cacheKey = `anilist:streaming-episodes:${id}`;
+  const cacheKey = `anilist:${CACHE_VERSION}:streaming-episodes:${id}`;
 
   return getOrSetCache(cacheKey, async () => {
     const variables = { id: Number(id) };

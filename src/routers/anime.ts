@@ -144,7 +144,7 @@ anime.get("/detail/:id/characters", async (req, res) => {
   console.log("get anime detail characters api..");
   const { id } = req.params;
   const page = req.query.page ? Number(req.query.page) : 1;
-  const perPage = req.query.perPage ? Number(req.query.perPage) : 20;
+  const perPage = req.query.perPage ? Number(req.query.perPage) : 50;
   try {
     const data = await getAnilistCharactersById({ id, page, perPage });
     res.status(200).json(data);
