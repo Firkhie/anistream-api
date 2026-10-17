@@ -14,7 +14,9 @@ const app = express();
 // Trust reverse proxies (Vercel, Cloudflare, AWS, Nginx) so req.ip and X-Forwarded-For work correctly
 app.set("trust proxy", 1);
 
-const allowedOrigins = env.ALLOWED_ORIGINS?.split(",").map(origin => origin.trim());
+const allowedOrigins = env.ALLOWED_ORIGINS
+  ? env.ALLOWED_ORIGINS.split(",").map(origin => origin.trim())
+  : ["*"];
 
 // Standard in-memory fallback rate limiter
 const localLimiter = rateLimit({
