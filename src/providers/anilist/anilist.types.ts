@@ -60,6 +60,8 @@ export type MediaVariables = {
   formatIn?: MediaFormat[];
   statusIn?: MediaStatus[];
   genreIn?: GenreCollection[];
+  genreNotIn?: string[];
+  tagNotIn?: string[];
   averageScoreGreater?: number;
   averageScoreLesser?: number;
   sort?: MediaSort[];

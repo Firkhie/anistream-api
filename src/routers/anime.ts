@@ -74,11 +74,13 @@ anime.get("/search", async (req, res) => {
     seasonYear: req.query.year ? Number(req.query.year) : undefined, // FE Query use 'year'
     format: req.query.format ? req.query.format as MediaFormat : undefined,
     status: req.query.status ? req.query.status as MediaStatus : undefined,
-    isAdult: Boolean(req.query.isAdult),
+    isAdult: req.query.isAdult === "true" ? true : req.query.isAdult === "false" ? false : undefined,
     search: req.query.query ? String(req.query.query) : undefined, // FE Query use 'query'
     averageScoreGreater: req.query.averageScoreGreater ? Number(req.query.averageScoreGreater) : undefined,
     averageScoreLesser: req.query.averageScoreLesser ? Number(req.query.averageScoreLesser) : undefined,
     genreIn: req.query.genres ? String(req.query.genres).split(",") as GenreCollection[] : undefined, // FE Query use 'genres'
+    genreNotIn: req.query.genreNotIn ? String(req.query.genreNotIn).split(",") : undefined,
+    tagNotIn: req.query.tagNotIn ? String(req.query.tagNotIn).split(",") : undefined,
     sort: req.query.sort ? String(req.query.sort).split(",") as MediaSort[] : undefined,
   };
   const cleanedQueries = cleanQueries({ queries });

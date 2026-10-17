@@ -108,7 +108,7 @@ export enum GenreCollection {
   DRAMA = "Drama",
   ECCHI = "Ecchi",
   FANTASY = "Fantasy",
-  HENTAI = "Hentai",
+
   HORROR = "Horror",
   MAHOU_SHOUJO = "Mahou Shoujo",
   MECHA = "Mecha",

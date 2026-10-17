@@ -4,7 +4,7 @@ import { getOrSetCache } from "../../redis.js";
 import { BadRequestError } from "../../utils/errors.js";
 import { GenreCollection, MediaFormat, MediaSeason, MediaSort, MediaStatus, MediaType, StaffLanguageV2 } from "./anilist.enums.js";
 import { fetchAnilist, fetchAnilistIds } from "./anilist.fetch.js";
-import { anilistAiringQuery, anilistCharacterQuery, anilistDetailQuery, anilistSearchQuery, anilistStreamingEpisodesQuery, anilistTitleQuery } from "./anilist.queries.js";
+import { anilistAiringQuery, anilistCharacterQuery, anilistDetailQuery, anilistRecentAiringQuery, anilistSearchQuery, anilistStreamingEpisodesQuery, anilistTitleQuery } from "./anilist.queries.js";
 
 const animeFormat: MediaFormat[] = [
   MediaFormat.TV,
@@ -20,7 +20,21 @@ const langFormat: StaffLanguageV2[] = [
   StaffLanguageV2.INDONESIAN,
 ];
 
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v7";
+
+function cleanGenres(genres?: GenreCollection[] | string[] | null): GenreCollection[] {
+  if (!genres)
+    return [];
+  return (genres as GenreCollection[]).filter(g => g && (g as string).toLowerCase() !== "hentai");
+}
+
+function isAdultOrHentai(item: { isAdult?: boolean | null; genres?: (GenreCollection | string)[] | null; tags?: { name?: string | null; isAdult?: boolean | null }[] | null } | null | undefined): boolean {
+  if (!item) return false;
+  if (item.isAdult) return true;
+  if (item.genres?.some(g => (g as string).toLowerCase() === "hentai")) return true;
+  if (item.tags?.some(t => t.name?.toLowerCase() === "hentai" || (t.isAdult && t.name?.toLowerCase().includes("hentai")))) return true;
+  return false;
+}
 
 type PresetName = "popular" | "trending" | "newest" | "upcoming";
 const animePreset: Record<PresetName, Partial<MediaVariables>> = {
@@ -28,36 +42,121 @@ const animePreset: Record<PresetName, Partial<MediaVariables>> = {
     type: MediaType.ANIME,
     sort: [MediaSort.POPULARITY_DESC],
     formatIn: animeFormat,
+    isAdult: false,
+    genreNotIn: ["Hentai"],
+    tagNotIn: ["Hentai"],
   },
   trending: {
     type: MediaType.ANIME,
     sort: [MediaSort.TRENDING_DESC],
     formatIn: animeFormat,
     status: MediaStatus.RELEASING,
+    isAdult: false,
+    genreNotIn: ["Hentai"],
+    tagNotIn: ["Hentai"],
   },
   newest: {
     type: MediaType.ANIME,
     sort: [MediaSort.START_DATE_DESC],
     formatIn: animeFormat,
     status: MediaStatus.RELEASING,
+    isAdult: false,
+    genreNotIn: ["Hentai"],
+    tagNotIn: ["Hentai"],
   },
   upcoming: {
     type: MediaType.ANIME,
     sort: [MediaSort.POPULARITY_DESC],
     formatIn: animeFormat,
     status: MediaStatus.NOT_YET_RELEASED,
+    isAdult: false,
+    genreNotIn: ["Hentai"],
+    tagNotIn: ["Hentai"],
   },
 };
 
+export async function getAnilistNewestReleases({ page, perPage }: { page: number; perPage: number }) {
+  const now = Math.floor(Date.now() / 1000);
+  const bucket = Math.floor(now / 900);
+  const cacheKey = `anilist:${CACHE_VERSION}:newest:p${page}:pp${perPage}:b${bucket}`;
+  const ttlSeconds = 60 * 15; // 15 minutes
+
+  return getOrSetCache(cacheKey, async () => {
+    const variables = { page, perPage, airingAtLesser: now };
+    const data = (await fetchAnilist({ query: anilistRecentAiringQuery, variables })).data.Page;
+
+    const seenIds = new Set<number>();
+    const animeBasics: AnimeBasic[] = [];
+
+    for (const item of data.airingSchedules ?? []) {
+      if (!item?.media || !animeFormat.includes(item.media.format) || isAdultOrHentai(item.media))
+        continue;
+
+      if (seenIds.has(item.media.id))
+        continue;
+      seenIds.add(item.media.id);
+
+      animeBasics.push({
+        id: item.media.id,
+        idMal: item.media.idMal ?? null,
+        title: {
+          romaji: item.media.title?.romaji ?? null,
+          english: item.media.title?.english ?? null,
+          native: item.media.title?.native ?? null,
+          userPreferred: item.media.title?.userPreferred ?? null,
+        },
+        format: item.media.format ?? null,
+        status: item.media.status ?? null,
+        description: item.media.description ?? null,
+        season: item.media.season ?? null,
+        year: item.media.seasonYear ?? null,
+        totalEpisodes: item.media.episodes ?? null,
+        currentEpisode: item.episode ?? null,
+        color: item.media.coverImage?.color ?? null,
+        coverImage:
+          item.media.coverImage?.extraLarge
+          ?? item.media.coverImage?.large
+          ?? item.media.coverImage?.medium
+          ?? null,
+        bannerImage: item.media.bannerImage ?? null,
+        genres: cleanGenres(item.media.genres),
+        rating: item.media.averageScore ?? null,
+        nextAiringEpisode: item.media.nextAiringEpisode
+          ? {
+              airingAt: item.media.nextAiringEpisode.airingAt ?? null,
+              episode: item.media.nextAiringEpisode.episode ?? null,
+              timeUntilAiring: item.media.nextAiringEpisode.timeUntilAiring ?? null,
+            }
+          : null,
+      });
+    }
+
+    const result: SearchResponse = {
+      currentPage: data.pageInfo?.currentPage ?? 1,
+      hasNextPage: data.pageInfo?.hasNextPage ?? false,
+      results: animeBasics,
+    };
+
+    return result;
+  }, ttlSeconds);
+}
+
 export async function getAnilistByPreset({ preset, page, perPage }: { preset: PresetName; page: number; perPage: number }) {
+  if (preset === "newest") {
+    return getAnilistNewestReleases({ page, perPage });
+  }
+
   const variables = { ...animePreset[preset], page, perPage };
   const cacheKey = `anilist:${CACHE_VERSION}:${preset}:p${page}:pp${perPage}`;
-  const ttlSeconds = (preset === "newest" || preset === "trending") ? 60 * 60 * 2 : 60 * 60 * 12;
+  const ttlSeconds = preset === "trending" ? 60 * 60 * 2 : 60 * 60 * 12;
 
   return getOrSetCache(cacheKey, async () => {
     const data = (await fetchAnilist({ query: anilistSearchQuery, variables })).data.Page;
 
-    const animeBasics: AnimeBasic[] = data.media.map((item: any) => {
+    const animeBasics: AnimeBasic[] = (data.media.map((item: any) => {
+      if (isAdultOrHentai(item))
+        return null;
+
       const animeBasic: AnimeBasic = {
         id: item.id,
         idMal: item.idMal ?? null,
@@ -83,7 +182,7 @@ export async function getAnilistByPreset({ preset, page, perPage }: { preset: Pr
           ?? item.coverImage?.medium
           ?? null,
         bannerImage: item.bannerImage ?? null,
-        genres: item.genres ?? [],
+        genres: cleanGenres(item.genres),
         rating: item.averageScore ?? null,
         nextAiringEpisode: item.nextAiringEpisode
           ? {
@@ -95,7 +194,7 @@ export async function getAnilistByPreset({ preset, page, perPage }: { preset: Pr
       };
 
       return animeBasic;
-    }) ?? [];
+    }) ?? []).filter(Boolean);
 
     const result: SearchResponse = {
       currentPage: data.pageInfo?.currentPage ?? null,
@@ -142,6 +241,9 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
     const searchVariables: MediaVariables = {
       ...variables,
       type: MediaType.ANIME,
+      isAdult: variables.isAdult !== undefined ? variables.isAdult : false,
+      genreNotIn: variables.genreNotIn ?? ["Hentai"],
+      tagNotIn: variables.tagNotIn ?? ["Hentai"],
       formatIn: variables.format ? undefined : (variables.formatIn?.length ? variables.formatIn : animeFormat),
     };
     const raw = await fetchAnilist({ query: anilistSearchQuery, variables: searchVariables });
@@ -157,7 +259,10 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
 
     const mediaList = Array.isArray(data.media) ? data.media : [];
 
-    const animeBasics: AnimeBasic[] = mediaList.map((item: any) => {
+    const animeBasics: AnimeBasic[] = (mediaList.map((item: any) => {
+      if (isAdultOrHentai(item))
+        return null;
+
       const animeBasic: AnimeBasic = {
         id: item.id,
         idMal: item.idMal ?? null,
@@ -183,7 +288,7 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
         ?? item.coverImage?.medium
         ?? null,
         bannerImage: item.bannerImage ?? null,
-        genres: item.genres ?? [],
+        genres: cleanGenres(item.genres),
         rating: item.averageScore ?? null,
         nextAiringEpisode: item.nextAiringEpisode
           ? {
@@ -195,7 +300,7 @@ export async function getAnilistBySearch({ variables }: { variables: MediaVariab
       };
 
       return animeBasic;
-    }) ?? [];
+    }) ?? []).filter(Boolean);
 
     const result: SearchResponse = {
       currentPage: data.pageInfo?.currentPage ?? null,
@@ -219,7 +324,11 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
     const data = (await fetchAnilist({ query: anilistAiringQuery, variables })).data.Page;
 
     const animeBasics: AnimeBasic[] = data.airingSchedules.map((item: any) => {
-      if (!animeFormat.includes(item.media.format))
+      if (
+        !item?.media ||
+        !animeFormat.includes(item.media.format) ||
+        isAdultOrHentai(item.media)
+      )
         return null;
 
       const animeBasic: AnimeBasic = {
@@ -247,7 +356,7 @@ export async function getAnilistAiringSchedule({ days, page, perPage }: { days: 
         ?? item.media.coverImage?.medium
         ?? null,
         bannerImage: item.media.bannerImage ?? null,
-        genres: item.media.genres ?? [],
+        genres: cleanGenres(item.media.genres),
         rating: item.media.averageScore ?? null,
         nextAiringEpisode: {
           airingAt: item.airingAt ?? item.media.nextAiringEpisode?.airingAt ?? null,
@@ -273,10 +382,18 @@ export async function getAnilistDetailByRandom() {
   const data = await fetchAnilistIds();
 
   const ids = data?.trim().split("\n");
-  const randomize = Math.floor(Math.random() * ids.length);
-  const selectedAnime = String(ids[randomize]);
+  if (!ids || ids.length === 0) return null;
 
-  return await getAnilistDetailById({ id: selectedAnime });
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const randomize = Math.floor(Math.random() * ids.length);
+    const selectedAnime = String(ids[randomize]);
+    const detail = await getAnilistDetailById({ id: selectedAnime });
+    if (detail && !isAdultOrHentai(detail)) {
+      return detail;
+    }
+  }
+
+  return null;
 }
 
 export async function getAnilistDetailById({ id }: { id: string }) {
@@ -331,7 +448,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
       ?? data.coverImage?.medium
       ?? null,
       bannerImage: data.bannerImage ?? null,
-      genres: data.genres ?? [],
+      genres: cleanGenres(data.genres),
       synonyms: data.synonyms ?? [],
       rating: data.averageScore ?? null,
       popularity: data.popularity ?? null,
@@ -351,6 +468,8 @@ export async function getAnilistDetailById({ id }: { id: string }) {
           if (item.node.type !== "ANIME")
             return null;
           if (!animeFormat.includes(item.node.format))
+            return null;
+          if (isAdultOrHentai(item.node))
             return null;
 
           return {
@@ -378,7 +497,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
               ?? item.node.coverImage?.medium
               ?? null,
             bannerImage: item.node.bannerImage ?? null,
-            genres: item.node.genres ?? [],
+            genres: cleanGenres(item.node.genres),
             rating: item.node.averageScore ?? null,
             relationType: item.relationType,
             nextAiringEpisode: item.node.nextAiringEpisode
@@ -424,6 +543,8 @@ export async function getAnilistDetailById({ id }: { id: string }) {
             return null;
           if (!animeFormat.includes(rec.format))
             return null;
+          if (isAdultOrHentai(rec))
+            return null;
 
           return {
             id: rec.id,
@@ -447,7 +568,7 @@ export async function getAnilistDetailById({ id }: { id: string }) {
             coverImage:
               rec.coverImage?.extraLarge ?? rec.coverImage?.large ?? rec.coverImage?.medium ?? null,
             bannerImage: rec.bannerImage ?? null,
-            genres: rec.genres ?? [],
+            genres: cleanGenres(rec.genres),
             rating: rec.averageScore ?? null,
             nextAiringEpisode: rec.nextAiringEpisode
               ? {
