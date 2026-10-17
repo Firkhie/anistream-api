@@ -1,7 +1,7 @@
 {
   "name": "anistream-api",
   "version": "1.0.0",
-  "description": "An API for anime information, episodes, and streaming sources.",
+  "description": "An API for anime information, metadata, schedules, and episode guides.",
   "author": "Firdig Alfalakhi <alfalakhie@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -11,7 +11,7 @@
   "keywords": [
     "anime",
     "api",
-    "streaming",
+    "metadata",
     "episodes"
   ],
   "main": "src/index.ts",

@@ -7,7 +7,7 @@
 # <p align="center">AniStream API</p>
 
 <div align="center">
-  A high-performance, modular, and resilient RESTful API for anime metadata, airing schedules, episode guides, and streaming sources.
+  A high-performance, modular, and resilient RESTful API for anime metadata, airing schedules, episode guides, and character databases.
 
   <br />
   <br />
@@ -37,14 +37,15 @@
 > [!WARNING]
 > **API SERVICE ONLY — THE FRONTEND APPLICATION IS PRIVATE**  
 > This repository (`anistream-api`) contains **ONLY the backend REST API service**, not the website itself. The front-end web application repository (`anistream`) is currently private. Only `anistream-api` is open-source and publicly accessible.  
-> You can deploy this API to power your own custom anime web apps, mobile clients, Discord bots, or personal streaming frontends.
+> You can deploy this API to power your own custom anime discovery web apps, mobile clients, Discord bots, or metadata services.
 
 > [!IMPORTANT]
-> 1. **Self-Hosting Recommended**: Self-hosting your own instance of AniStream API is strongly recommended for personal or production applications. Configure rate limits and CORS allowed origins to match your domain.
-> 2. **Fail-Open Architecture**: Built-in Upstash Redis caching operates with a fail-open strategy. If Redis is unconfigured or experiences network downtime, the API transparently bypasses the cache and continues serving live data without crashing.
+> 1. **Information & Metadata API Focus**: This API provides comprehensive anime information, seasonal charts, episode guides, character cast details, and airing countdown schedules via AniList GraphQL and AniZip.
+> 2. **Stream Sources Notice**: Upstream third-party video scraping sources (`/anime/servers` and `/anime/stream`) are currently **inactive / deprecated** because the original scraping sources are offline. The route handlers remain in the repository as architectural stubs for developers who wish to plug in custom streaming scrapers via `IStreamingProvider`.
+> 3. **Fail-Open Architecture**: Built-in Upstash Redis caching operates with a fail-open strategy. If Redis is unconfigured or experiences network downtime, the API transparently bypasses the cache and continues serving live data without crashing.
 
 > [!CAUTION]
-> AniStream API does not host, store, or upload any video files or proprietary media on its servers. It aggregates metadata and scrapes public upstream providers (AniList GraphQL, HiAnime, YumaAPI, and AniZip). Please ensure compliance with the terms of service of upstream providers and your local regulations.
+> AniStream API does not host, store, or upload any video files or media on its servers. It aggregates public metadata from AniList GraphQL and AniZip. Please ensure compliance with the terms of service of upstream providers and your local regulations.
 
 ---
 
@@ -72,8 +73,8 @@
   - [`GET /anime/detail/:id` (Full Details)](#get-animedetailid)
   - [`GET /anime/detail/:id/characters` (Cast & Voice Actors)](#get-animedetailidcharacters)
   - [`GET /anime/episodes/:id` (Episode List)](#get-animeepisodesid)
-  - [`GET /anime/servers` (Streaming Servers)](#get-animeservers)
-  - [`GET /anime/stream` (HLS Playback Sources)](#get-animestream)
+  - [`GET /anime/servers` (Legacy / Inactive)](#get-animeservers)
+  - [`GET /anime/stream` (Legacy / Inactive)](#get-animestream)
 - [Caching & Rate Limiting (Redis)](#-caching--rate-limiting-redis)
 - [Development & Testing](#-development--testing)
 - [License & Disclaimer](#-license--disclaimer)
@@ -82,7 +83,8 @@
 
 ## ⚡ Key Features
 
-- **🔌 Modular Provider Architecture**: Standardized provider interface (`IStreamingProvider`) backed by a multi-provider fallback engine (`ProviderManager`). If an upstream source fails or goes down, alternate scrapers are queried seamlessly.
+- **📖 Complete Anime Metadata Engine**: Rich GraphQL integration with AniList and AniZip delivering high-fidelity anime metadata, episode listings, character details, and live broadcast countdown schedules.
+- **🔌 Pluggable Architecture**: Modular provider pattern (`IStreamingProvider` / `ProviderManager`) designed so developers can plug in custom scraper engines. *(Note: Upstream video streaming scrapers are currently inactive due to source deprecation)*.
 - **⚡ Fail-Open Upstash Redis Caching**: Multi-tier cache-aside pattern (`getOrSetCache`). Automatically caches heavy GraphQL queries (Details, Characters, Schedules, Presets). If Redis experiences network limits or downtime, requests bypass the cache and fetch live data without interrupting users.
 - **🛡️ Distributed Rate Limiting & Anti-Spam**: Combines Upstash Redis with `express-rate-limit` for sliding-window IP limits (default: 60 req/min) that stay synchronized across serverless cold starts.
 - **🤖 Built-in Bot & Scraper Shielding**: Automated HTTP clients (`curl`, `python-requests`, `aiohttp`, `scrapy`, etc.) are blocked in production unless accessing `/health` or authenticated with an `x-api-key` header matching `API_SECRET_KEY`.
@@ -98,11 +100,11 @@ anistream-api/
 ├── api/
 │   └── index.ts                 # Vercel serverless function entrypoint
 ├── src/
-│   ├── providers/               # Upstream metadata & stream providers
-│   │   ├── anilist/             # AniList GraphQL queries & service
-│   │   ├── anizip/              # AniZip metadata mapping & episode numbering
-│   │   ├── hianime/             # HiAnime scraper & MegaCloud decryptors
-│   │   ├── yumaapi/             # YumaAPI extractor
+│   ├── providers/               # Metadata providers & scraper modules
+│   │   ├── anilist/             # Active AniList GraphQL service
+│   │   ├── anizip/              # Active AniZip metadata & episode mapping
+│   │   ├── hianime/             # Legacy HiAnime scraper module
+│   │   ├── yumaapi/             # Legacy YumaAPI extractor module
 │   │   ├── provider.interface.ts # Standardized IStreamingProvider interface
 │   │   └── provider.manager.ts   # Fallback manager with priority ranking
 │   ├── routers/                 # Express route definitions (/anime/...)
@@ -582,7 +584,10 @@ GET /anime/episodes/:id?provider={provider}
 </details>
 
 <details>
-<summary><h3>GET /anime/servers</h3></summary>
+<summary><h3>GET /anime/servers ⚠️ (Legacy / Inactive)</h3></summary>
+
+> [!WARNING]
+> **Upstream Sources Offline**: This route is currently **inactive** because the third-party upstream video sources are offline. This endpoint is retained in the codebase as an architectural reference for custom `IStreamingProvider` implementations.
 
 #### Description
 Retrieves available streaming server IDs and categories (`sub`, `dub`, `raw`) for an episode.
@@ -602,7 +607,10 @@ GET /anime/servers?id={episodeId}&provider={provider}
 </details>
 
 <details>
-<summary><h3>GET /anime/stream</h3></summary>
+<summary><h3>GET /anime/stream ⚠️ (Legacy / Inactive)</h3></summary>
+
+> [!WARNING]
+> **Upstream Sources Offline**: Video stream extraction is currently **inactive** because the original scraping sources have ceased operation. In consumer applications (like `anistream`), users are redirected to official / external guides. This route handler remains available for developers implementing their own streaming provider modules.
 
 #### Description
 Resolves playable HLS (`.m3u8`) streaming sources and subtitle tracks for a specified episode and server.
