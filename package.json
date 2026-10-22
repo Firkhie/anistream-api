@@ -15,6 +15,9 @@
     "episodes"
   ],
   "main": "src/index.ts",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node --env-file-if-exists=.env dist/src/index.js",
     "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
@@ -24,12 +27,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@upstash/redis": "^1.35.4",
-    "cheerio": "^1.1.2",
+    "@upstash/redis": "^1.39.0",
+    "cheerio": "^1.2.0",
     "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "express-rate-limit": "^8.3.1",
-    "helmet": "^8.1.0",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
     "morgan": "^1.10.0",
     "string-similarity": "^4.0.4",
     "zod": "^3.25.67"
